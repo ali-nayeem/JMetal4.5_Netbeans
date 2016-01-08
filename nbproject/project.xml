@@ -5,7 +5,7 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>JMetal4.5</name>
             <source-roots>
-                <root id="src.jmetal.dir" name="Source Package"/>
+                <root id="src.src.dir" name="Source Package"/>
             </source-roots>
             <test-roots/>
         </data>
