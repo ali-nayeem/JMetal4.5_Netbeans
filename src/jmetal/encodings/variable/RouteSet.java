@@ -28,14 +28,14 @@ public class RouteSet extends Variable
 {
 
     public ArrayList<Route> routeSet = new ArrayList<>();
-    double d[] =
+    public double d[] =
     {
         0, 0, 0
-    };// d0,d1,dun
+    };// d0,d1,dun => direct , 1-transfer , unsatisfied 
     static double epsilon = 0.1;
     double totalIVTT;
 
-    static RouteSet readFromFile(String fileName) throws Exception
+    public static RouteSet readFromFile(String fileName) throws Exception
     {
         RouteSet rs = new RouteSet();
         FileReader fr = new FileReader(fileName);
@@ -54,17 +54,17 @@ public class RouteSet extends Variable
         return rs;
     }
 
-    int size()
+    public int size()
     {
         return routeSet.size();
     }
 
-    ArrayList<Integer> getRouteArrayList(int i)
+    public ArrayList<Integer> getRouteArrayList(int i)
     {
         return routeSet.get(i).nodeList;
     }
 
-    Route getRoute(int i)
+    public Route getRoute(int i)
     {
         return routeSet.get(i);
     }

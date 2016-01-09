@@ -16,16 +16,18 @@ public class Route
 
     public ArrayList<Integer> nodeList = new ArrayList<>();
     //int id;
-    double frequency = 1;
-    double revFreq;
+    public double frequency = 1;
+    double revFreq = -1;
     double roundTripTime;
     int MLS;
-    double fleetSize;
+    private double fleetSize;
     static double stationStandTime = 0;
     static int minFreq = 1;
     static int busCap = 50;
     static double diffThreshold = 0.01;
     boolean converged = false;
+    private double waitingTime;
+    private double length = -1;
     
     int revCount = 0;
     boolean addAtEnd = true;
@@ -48,7 +50,7 @@ public class Route
 
     }
 
-    boolean reviseFrequency(double MLSDemand, int MLS)
+    public boolean reviseFrequency(double MLSDemand, int MLS)
     {
         this.MLS = MLS;
         revFreq = Math.max(minFreq, MLSDemand / busCap);
@@ -69,23 +71,48 @@ public class Route
         return r;
     }
 
-    void calculateFleetSize()
+    public double calculateFleetSize()
     {
+        if(revFreq == -1)
+       {
+           throw new Error("Attempt to calculate FleetSize before frequency calculaution");
+       }
         fleetSize = Math.ceil(frequency * roundTripTime / 60.0);
+        return fleetSize;
     }
 
-//    void calculateRoundTripTime()
-//    {
-//        roundTripTime = 0;
-//        for (int i = 1; i < nodeList.size(); i++)
-//        {
-//            roundTripTime += TripAsssignmentTest.time[nodeList.get(i)][nodeList.get(i - 1)];
-//        }
-//        roundTripTime += (nodeList.size() - 1) * stationStandTime;
-//        roundTripTime = 2 * roundTripTime;
-//    }
-
-    int size()
+    public double calculateRouteLength_RoundTrip_edgeOverlap(int [][] time, int[][] edgeUsage)
+    {
+        roundTripTime = 0;
+        for (int i = 1; i < nodeList.size(); i++)
+        {
+            roundTripTime += time[nodeList.get(i)][nodeList.get(i - 1)];
+            edgeUsage[nodeList.get(i)][nodeList.get(i - 1)] = ++edgeUsage[nodeList.get(i - 1)][nodeList.get(i)];
+        }
+        length = roundTripTime;
+        roundTripTime += (nodeList.size() - 1) * stationStandTime;
+        roundTripTime = 2 * roundTripTime;
+        return length;
+    }
+    public double getLength()
+    {
+        if(length == -1)
+        {
+            throw new Error("Attempt to get route length before calculaution");
+        }
+        return length;
+            
+    }
+   public double calculateWaitingTime()
+   {
+       if(revFreq == -1)
+       {
+           throw new Error("Attempt to calculate waiting time before frequency calculaution");
+       }
+       waitingTime = 60.0 / (2.0 * frequency) ;
+       return waitingTime;
+   }
+   public int size()
     {
         return nodeList.size();
     }

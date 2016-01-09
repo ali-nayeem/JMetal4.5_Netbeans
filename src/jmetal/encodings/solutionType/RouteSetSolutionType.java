@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jmetal.core.Problem;
 import jmetal.core.SolutionType;
 import jmetal.core.Variable;
@@ -36,8 +38,16 @@ public class RouteSetSolutionType extends SolutionType
     {
         Variable[] variables = new Variable[1];
         
-        RouteSet rs = new RouteSet();
-        rs.generateRouteSet(prob);
+        //RouteSet rs = new RouteSet();
+        RouteSet rs = null;
+        try
+        {
+            rs = RouteSet.readFromFile(prob.ins.getRouteFile());
+        } catch (Exception ex)
+        {
+            Logger.getLogger(RouteSetSolutionType.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //rs.generateRouteSet(prob);
         variables[0] = rs;
 
         return variables;

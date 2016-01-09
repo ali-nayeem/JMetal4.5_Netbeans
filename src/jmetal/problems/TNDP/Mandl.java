@@ -9,19 +9,19 @@ package jmetal.problems.TNDP;
  *
  * @author MAN
  */
-public class Small extends Instance
+public class Mandl extends Instance
 {
 
-    Small()
+    Mandl()
     {
-        numOfVertices = 9;
-        dir = "IO/Small/";
-        demandFile = "SmallDemand.txt";
-        timeFile = "SmallTime.txt";
-        RouteFile = "SmallRoute.txt";
-        EdgeListFile = "SmallEdgelist.txt";
+        numOfVertices = 15;
+        dir = "IO/Mandl/";
+        demandFile = "MandlDemand.txt";
+        timeFile = "MandlTime.txt";
+        RouteFile = "MandlPRoute.txt";
+        EdgeListFile = "MandlEdgelist.txt";
         minNode = 2;
-        maxNode = 6;
+        maxNode = 10;
     }
     
 }
