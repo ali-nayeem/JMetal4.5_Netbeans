@@ -20,6 +20,8 @@ public class Small extends Instance
         timeFile = "SmallTime.txt";
         RouteFile = "SmallRoute.txt";
         EdgeListFile = "SmallEdgelist.txt";
+        minNode = 2;
+        maxNode = 6;
     }
 
   

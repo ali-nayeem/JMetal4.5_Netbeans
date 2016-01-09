@@ -5,9 +5,18 @@
  */
 package jmetal.encodings.solutionType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import jmetal.core.Problem;
 import jmetal.core.SolutionType;
 import jmetal.core.Variable;
+import jmetal.encodings.variable.Real;
+import jmetal.encodings.variable.Route;
+import jmetal.problems.TNDP.TNDP;
+import jmetal.encodings.variable.RouteSet;
+import jmetal.util.PseudoRandom;
 
 /**
  *
@@ -16,6 +25,7 @@ import jmetal.core.Variable;
 public class RouteSetSolutionType extends SolutionType
 {
 
+    private final TNDP prob = (TNDP)problem_;
     public RouteSetSolutionType(Problem problem)
     {
         super(problem);
@@ -24,7 +34,15 @@ public class RouteSetSolutionType extends SolutionType
     @Override
     public Variable[] createVariables() throws ClassNotFoundException
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Variable[] variables = new Variable[1];
+        
+        RouteSet rs = new RouteSet();
+        rs.generateRouteSet(prob);
+        variables[0] = rs;
+
+        return variables;
     }
+
     
+
 }

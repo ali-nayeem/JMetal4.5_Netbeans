@@ -28,9 +28,9 @@ public class TNDP extends Problem
     private int[][] demand ;
     private int[][] time ;
     private double totalDemand;
-    private Grph g;
+    public Grph g;
     private NumericalProperty EdgeWeight;
-    private Instance ins;
+    public Instance ins;
 
     public TNDP(int _numOfRoutes, Instance _ins) throws Exception
     {
@@ -56,6 +56,13 @@ public class TNDP extends Problem
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void evaluateConstraints(Solution solution) throws JMException
+    {
+        
+    }
+    
 
     public int getNumberOfRoutes()
     {

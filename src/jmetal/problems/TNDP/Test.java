@@ -5,6 +5,10 @@
  */
 package jmetal.problems.TNDP;
 
+import jmetal.core.Solution;
+import jmetal.core.Variable;
+import jmetal.encodings.variable.RouteSet;
+
 /**
  *
  * @author MAN
@@ -14,6 +18,15 @@ public class Test
 
     public static void main(String[] args) throws Exception
     {
-        TNDP s = new TNDP(3, new Small());
+        TNDP small = new TNDP(3, new Small());
+        for (int i = 0; i < 10; i++)
+        {
+            Solution newSolution = new Solution(small);
+            Variable[] var  = newSolution.getDecisionVariables();
+            RouteSet rs = (RouteSet)var[0];
+            System.out.println(rs);
+            rs.lengthCheck(small);
+            rs.ConnectednessCheck(small);
+        }
     }
 }

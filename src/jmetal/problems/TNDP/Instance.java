@@ -18,6 +18,8 @@ public abstract class Instance
     protected String timeFile;
     protected String RouteFile;
     protected String EdgeListFile;
+    protected int minNode;
+    protected  int maxNode;
 
     public int getNumOfVertices()
     {
@@ -48,4 +50,15 @@ public abstract class Instance
     {
         return dir + EdgeListFile;
     }
+
+    public int getMinNode()
+    {
+        return minNode;
+    }
+
+    public int getMaxNode()
+    {
+        return maxNode;
+    }
+    
 }
