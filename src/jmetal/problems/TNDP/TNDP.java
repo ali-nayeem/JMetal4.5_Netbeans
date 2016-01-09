@@ -48,8 +48,8 @@ public class TNDP extends Problem
         ins = _ins;
         numberOfVariables_ = 1;
         numberOfObjectives_ = 7;
-        numberOfConstraints_ = 0;
-        problemName_ = "Small";
+        numberOfConstraints_ = 2;
+        problemName_ = ins.getName();
         demand = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
         time = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
         solutionType_ = new RouteSetSolutionType(this);

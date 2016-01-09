@@ -20,10 +20,16 @@ public abstract class Instance
     protected String EdgeListFile;
     protected int minNode;
     protected  int maxNode;
+    protected String name;
 
     public int getNumOfVertices()
     {
         return numOfVertices;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     public String getDir()

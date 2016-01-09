@@ -60,7 +60,7 @@ public class Path
     void setName(String s)
     {
         name = s;
-        System.out.println(s);
+        //System.out.println(s);
     }
 
     public class Segment
@@ -79,7 +79,7 @@ public class Path
 
     }
     double demandPerc;
-    String name = "";
+    private String name = "";
 
     @Override
     public String toString()

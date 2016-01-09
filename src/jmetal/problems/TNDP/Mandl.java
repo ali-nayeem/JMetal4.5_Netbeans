@@ -22,6 +22,7 @@ public class Mandl extends Instance
         EdgeListFile = "MandlEdgelist.txt";
         minNode = 2;
         maxNode = 10;
+        name = "Mandl";
     }
     
 }

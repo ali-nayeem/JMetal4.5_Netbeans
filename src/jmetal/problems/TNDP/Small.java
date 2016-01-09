@@ -22,6 +22,7 @@ public class Small extends Instance
         EdgeListFile = "SmallEdgelist.txt";
         minNode = 2;
         maxNode = 6;
+        name = "Small";
     }
     
 }

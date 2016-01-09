@@ -18,7 +18,7 @@ public class Test
 
     public static void main(String[] args) throws Exception
     {
-        TNDP small = new TNDP(4, new Mandl());
+        TNDP small = new TNDP(3, new Mandl());
         for (int i = 0; i < 1; i++)
         {
             Solution newSolution = new Solution(small);
@@ -28,6 +28,7 @@ public class Test
             rs.lengthCheck(small);
             rs.ConnectednessCheck(small);
             small.evaluate(newSolution);
+            System.out.println(newSolution);
         }
     }
 }
