@@ -48,16 +48,16 @@ public class RouteSetCrossover extends Crossover
             String name = cls.getName();
             throw new JMException("Exception in " + name + ".execute()");
         }
-//        if (!(VALID_TYPES.contains(parents[0].getType().getClass())
-//                && VALID_TYPES.contains(parents[1].getType().getClass())))
-//        {
-//            Configuration.logger_.severe("RouteSetCrossover.execute: the solutions "
-//                    + "type " + parents[0].getType() + " is not allowed with this operator");
-//
-//            Class cls = java.lang.String.class;
-//            String name = cls.getName();
-//            throw new JMException("Exception in " + name + ".execute()");
-//        } // if 
+        if (!(VALID_TYPES.contains(parents[0].getType().getClass())
+                && VALID_TYPES.contains(parents[1].getType().getClass())))
+        {
+            Configuration.logger_.severe("RouteSetCrossover.execute: the solutions "
+                    + "type " + parents[0].getType() + " is not allowed with this operator");
+
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        } // if 
 
         Solution[] offSpring;
         offSpring = doCrossover(parents[0], parents[1]);
