@@ -1,0 +1,17 @@
+function input_browse_labels_Callback (~,~h)
+[fileName,pathname]=uigetfile('*.mat','Select .mat file');                  %%Select file
+% L=load (fullfile(pathname,fileName));                                       %%Load selected file
+% fn=fieldnames(L);
+% x=L.(fn{1});                                                                %%Create cell array of strings
+% dimnum=getappdata(pcpnew,'dimnum');
+% if isequal(size(x),[1 dimnum])
+%     for i = 1 : dimnum
+%         h.ledit=findobj('tag',[num2str(i) 'ledit']);
+%         set(h.ledit,'string',cell2mat(x(i)));                               %%Set labels
+%     end
+% else
+%     h.errer=findobj('-regexp','tag','errer');                               %%If the dimensions don't match flag up and error
+%     set(h.errer,'string','Warning: Label matrix incorrect dimensions','ForegroundColor',[1 0 0]);
+%     pause(5);
+%     set(h.errer,'string','');
+% end

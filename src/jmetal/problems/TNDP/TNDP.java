@@ -62,6 +62,7 @@ public class TNDP extends Problem
 
     public class OBJECTIVES
     {
+
         public static final int IVTT = 0, WT = 1, TP = 2, UP = 3, FS = 4, RL = 5, DO = 6;
     }
 
@@ -443,7 +444,7 @@ public class TNDP extends Problem
             for (int i = 1; i < r.nodeList.size(); i++)
             {
                 int v0 = r.nodeList.get(i), v1 = r.nodeList.get(i - 1);
-                if(edgeUsage[v0][v1] > 1)
+                if (edgeUsage[v0][v1] > 1)
                 {
                     routeDO += time[v0][v1];
                 }
@@ -460,6 +461,10 @@ public class TNDP extends Problem
         RouteSet rs = (RouteSet) (solution.getDecisionVariables())[0];
         rs.lengthCheck((TNDP) solution.getProblem());
         rs.ConnectednessCheck((TNDP) solution.getProblem());
+        if (rs.getOverallConstraintViolation() != 0)
+        {
+            solution.setOverallConstraintViolation(rs.getOverallConstraintViolation());
+        }
     }
 
     public int getNumberOfRoutes()

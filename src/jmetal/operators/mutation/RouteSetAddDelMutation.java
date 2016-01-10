@@ -76,12 +76,12 @@ public class RouteSetAddDelMutation extends Mutation
         RouteSet rs = (RouteSet) solution.getDecisionVariables()[0];
         if (addProbability >= PseudoRandom.randDouble())
         {
-            System.out.println("Add Mutataion");
+            //System.out.println("Add Mutataion");
             add(rs, (TNDP) solution.getProblem());
             addCount++;
         } else
         {
-            System.out.println("Delete Mutataion");
+           // System.out.println("Delete Mutataion");
             del(rs, (TNDP) solution.getProblem());
             delCount++;
         }

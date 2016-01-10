@@ -21,7 +21,7 @@ public class Mandl extends Instance
         RouteFile = "MandlPRoute.txt";
         EdgeListFile = "MandlEdgelist.txt";
         minNode = 2;
-        maxNode = 10;
+        maxNode = 8;
         name = "Mandl";
     }
     

@@ -123,7 +123,7 @@ public class Route
         return nodeList.toString();
     }
 
-    Route deepCopy()
+    public Route deepCopy()
     {
         Route r = new Route();
         //r.nodeList =  (ArrayList<Integer>) nodeList.clone();

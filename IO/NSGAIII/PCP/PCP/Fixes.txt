@@ -1,0 +1,8 @@
+Add 'unitm(o)=unitm(order');' after line 593
+Around 769
+
+replace original ylabel with:
+
+	h.uedit=findobj('Tag',[num2str(scale_index(1)) 'uedit']);
+        unite=get(h.uedit,'string');
+        ylabel([dim_scaleax ' (' unite ')']);     %%Label Yaxis appropriately

@@ -33,6 +33,7 @@ public class RouteSet extends Variable
         0, 0, 0
     };// d0,d1,dun => direct , 1-transfer , unsatisfied 
     static double epsilon = 0.1;
+    private int overallConstraintViolation = 0;
    // double totalIVTT;
 
     public static RouteSet readFromFile(String fileName) throws Exception
@@ -90,6 +91,7 @@ public class RouteSet extends Variable
         do
         {
             routeSet.clear();
+            overallConstraintViolation = 0;
             Set<Integer> chosen = new HashSet<>();
             double chosenCount[] = new double[numOfVertices];
             Arrays.fill(chosenCount, epsilon);
@@ -215,6 +217,7 @@ public class RouteSet extends Variable
                 }
             }
         }
+        overallConstraintViolation = -1*absent.size();
         return false;
     }
 
@@ -271,14 +274,16 @@ public class RouteSet extends Variable
         }
 
         nRs.d = Arrays.copyOf(d, d.length);
-       // nRs.totalIVTT = totalIVTT;
+      //  nRs.overallConstraintViolation = overallConstraintViolation;
        
         return nRs;
     }
 
-    public RouteSet copy()
+    
+
+    public int getOverallConstraintViolation()
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return overallConstraintViolation;
     }
 
 }

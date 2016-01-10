@@ -30,6 +30,7 @@ public class RouteSetCrossover extends Crossover
 {
 
     private static final List VALID_TYPES = Arrays.asList(RouteSetSolutionType.class);
+    private int numOfOffspring = 1;
 
     public RouteSetCrossover(HashMap<String, Object> parameters)
     {
@@ -72,37 +73,37 @@ public class RouteSetCrossover extends Crossover
         rsParents[1] = (RouteSet) (parent2.getDecisionVariables())[0];
         RouteSet[] rsOffspring = doRouteSetCrossover(rsParents, (TNDP) parent1.getProblem());
 
-        Solution[] offSpring = new Solution[2];
+        Solution[] offSpring = new Solution[numOfOffspring];
 
         Variable[] vars1 = new Variable[1];        
         vars1[0] = rsOffspring[0];
         offSpring[0] = new Solution(parent1.getProblem(), vars1);
 
-        Variable[] vars2 = new Variable[1];
-        vars2[0] = rsOffspring[1];
-        offSpring[1] = new Solution(parent2.getProblem(), vars2);
+//        Variable[] vars2 = new Variable[1];
+//        vars2[0] = rsOffspring[1];
+//        offSpring[1] = new Solution(parent2.getProblem(), vars2);
         return offSpring;
     }
 
     private RouteSet[] doRouteSetCrossover(RouteSet[] parent, TNDP prob)
     {
-        RouteSet[] children = new RouteSet[2];
+        RouteSet[] children = new RouteSet[numOfOffspring];
         RouteSet[] parentCopy = new RouteSet[2];
         parentCopy[0] = (RouteSet) parent[0].deepCopy();
         parentCopy[1] = (RouteSet) parent[1].deepCopy();
-        int routeSetSize = parentCopy[1].size();
+        int routeSetSize = prob.getNumberOfRoutes();
         //Route removedRoute = null;
         int Vertices = prob.ins.getNumOfVertices();
 
-        for (int count = 0; count < 2; count++) //for getting 2 children
+        for (int count = 0; count < numOfOffspring; count++) //for getting 2 children
         {
             boolean feasible = false;
             int attempt = 0;
-            do //untill a feasible child is found
-            {
+           // do //untill a feasible child is found
+           // {
                 if (count == 0 && attempt > 0)
                 {
-                    parentCopy[0] = parent[0];
+                    parentCopy[0] = (RouteSet) parent[0].deepCopy();
                 }
                 children[count] = new RouteSet();
                 Set<Integer> chosen = new HashSet<>();
@@ -112,10 +113,10 @@ public class RouteSetCrossover extends Crossover
                 if (count == 0)
                 {
                     //removedRoute = r;
-                    parentCopy[curParent].routeSet.remove(randomindex);
+                    parentCopy[0].routeSet.remove(randomindex);
                 }
 
-                children[count].routeSet.add(r);
+                children[count].routeSet.add(r.deepCopy());
                 chosen.addAll(r.nodeList);
 
                 while (children[count].size() < routeSetSize)
@@ -154,7 +155,7 @@ public class RouteSetCrossover extends Crossover
                     int maxPropIndex = maxIndices.get(PseudoRandom.nextInt(maxIndices.size()));
                     Route sr = eligileRoutes.get(maxPropIndex);
                     //parents[curParent].routeSet.remove(sr);
-                    children[count].routeSet.add(sr);
+                    children[count].routeSet.add(sr.deepCopy());
                     chosen.addAll(sr.nodeList);
                 }
                 if (chosen.size() < Vertices)
@@ -166,7 +167,7 @@ public class RouteSetCrossover extends Crossover
                 }
                 attempt++;
                 //System.out.print(attempt + ",");
-            } while (!feasible);
+           // } while (!feasible);
         }
 
         return children;

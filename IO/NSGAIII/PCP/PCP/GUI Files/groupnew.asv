@@ -1,0 +1,347 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% MATLAB GUIDE startup functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function varargout = groupnew(varargin)
+% GROUPNEW MATLAB code for groupnew.fig
+%      GROUPNEW, by itself, creates a new GROUPNEW or raises the existing
+%      singleton*.
+%
+%      H = GROUPNEW returns the handle to a new GROUPNEW or the handle to
+%      the existing singleton*.
+%
+%      GROUPNEW('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in GROUPNEW.M with the given input arguments.
+%
+%      GROUPNEW('Property','Value',...) creates a new GROUPNEW or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before groupnew_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to groupnew_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help groupnew
+
+% Last Modified by GUIDE v2.5 13-Aug-2013 15:42:50
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @groupnew_OpeningFcn, ...
+    'gui_OutputFcn',  @groupnew_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before groupnew is made visible.
+function groupnew_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to groupnew (see VARARGIN)
+
+% Choose default command line output for groupnew
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes groupnew wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = groupnew_OutputFcn(hObject, eventdata, handles)
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% groupnew.m functions
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% --- Executes on button press in sclose.
+% Summary: Saves and closes group information
+% Description:
+%%%% -Number of groups increased by 1
+%%%% -Gets/sets relevant appdata and information from uicontrols
+%%%% -Group specifications are calculated and set, different processes are
+%%%% performed depending on whether range or rank has been selected
+%%%% -uicontrols for pcpnew.m are created for further group operations
+function sclose_Callback(hObject, eventdata, handles)
+numgrps=getappdata(pcpnew,'numgrps');                                       %%Increase number of groups
+numgrps=numgrps+1;
+h.gname=findobj('-regexp','Tag','gname');                                   %%Get/set appdata
+name=get(h.gname,'string');
+setappdata(pcpnew,'numgrps',numgrps);
+data_scaled=getappdata(pcpnew,'data_scaled');
+[mlength,dimnum]=size(data_scaled);                                         %%Create dimensions
+rangerank=getappdata(pcpnew,'rangerank');
+if rangerank(numgrps) == 1                                                  %%If 'within range' selected
+    h.table=findobj('-regexp','Tag','Gspec');
+    data=get(h.table,'data');                                               %%Get new group specification
+    groupspec_num=getappdata(pcpnew,'groupspec_num');                       %%Get all existing group specifications
+    for n=1 : 2                                                             %%Add new specification to existing
+        for j = 1:dimnum
+            if str2double(cell2mat(data(j,n)))>=0
+                G=str2double(cell2mat(data(j,n)))/100;
+                if n ==1
+                    groupspec_num(:,j,numgrps)=(data_scaled(:,j)<=G);       %%groupspec_num stores whether group specification conditions are met
+                elseif n == 2
+                    groupspec_num(:,j+dimnum,numgrps)=(data_scaled(:,j)>=G);%%If a specification is not met the groupspec_num stores a 0
+                end
+            elseif n==1
+                groupspec_num(:,j,numgrps)=1;                               %%If a specification is met or there was no specification the groupspec_num stores a 1
+            elseif n==2
+                groupspec_num(:,j+dimnum,numgrps)=1;
+            end   
+        end
+    end
+    setappdata(pcpnew,'groupspec_num',groupspec_num);                       %%Set new group specifications matrix
+    groupspec_str=getappdata(pcpnew,'groupspec_str');
+    groupspec_str(:,:,numgrps)=data;
+    setappdata(pcpnew,'groupspec_str',groupspec_str);
+    groupspec_rank=getappdata(pcpnew,'groupspec_rank');
+    groupspec_rank(:,numgrps)=NaN;
+    setappdata(pcpnew,'groupspec_rank',groupspec_rank);                     %%Set _rank as an empty group as the specification will be stored in _num
+    delete(groupnew);
+else                                                                        %%If 'rank similarity' selected
+    h.numpol=findobj('tag','numpol');
+    numpol=get(h.numpol,'value');                                           %%Get number of selected polulines
+    values=[1,2,3,4,5,6,7,8,9,10,20,30,40,50,100,200,300,400,500,1000];     %%Quicker than appdata?
+    numpol=values(numpol);
+    if numpol > mlength
+        h.errer=findobj('tag','errer');                                     %%If the dimensions don't match flag up and error
+        set(h.errer,'string','Warning: More similar polylines selected than number of data','ForegroundColor',[1 0 0]);
+        pause(5);
+        set(h.errer,'string','');
+    else
+        h.rtable=findobj('tag','Grspec');
+        data=get(h.rtable,'data');                                          %%Get table data and other appdata
+        groupspec_str=getappdata(pcpnew,'groupspec_str');
+        groupspec_num=getappdata(pcpnew,'groupspec_num');                   %%Even though nothing is added to _num it must not be over-ridden
+        groupspec_str(:,1,numgrps)=data;
+        groupspec_str(:,2,numgrps)={'NaN'};
+        groupspec_num(:,:,numgrps)=NaN;
+        setappdata(pcpnew,'groupspec_str',groupspec_str);                   %%Set new _str
+        setappdata(pcpnew,'groupspec_num',groupspec_num);                   %%Set _num as an empty group as the specification will be stored in _rank
+        for i = 1 : dimnum
+            if isnan(str2double(cell2mat(data(i,1))))
+                data(i,:)={'NaN'};                                          %%NaN all non-numeric
+            end
+        end
+        data=cell2mat(cellfun(@str2num,data,'uniformoutput',false));
+        if isnan(data)==ones(dimnum,1);                                     %%If all NaN make empty group
+            groupspec_rank=getappdata(pcpnew,'groupspec_rank');
+            groupspec_rank(:,numgrps)=0;
+            setappdata(pcpnew,'groupspec_rank',groupspec_rank);
+        else
+            data=data/100;                                                  %%Scale data
+            [a,b]=sort(data);                                               %%a is specifcations, b is positions
+            b(isnan(a))=[];                                                 %%Get rid of NaN data
+            a(isnan(a))=[];
+            dis=NaN(length(a),1);                                           %%dis is spaces for distances to spec.
+            dist=NaN(mlength,1);                                            %%dist is spaces for normalised distance to spec.
+            for i = 1:mlength                                               %%For all data
+                for n = 1:length(a)                                         %%For each specification
+                    dis(n)=(data_scaled(i,b(n))-a(n))^2;                    %%Distance per specification
+                end
+                dist(i)=(sum(dis))^(1/2);                                   %%Total distance
+            end
+            
+            groupspec_rank=getappdata(pcpnew,'groupspec_rank');             %%Get original _rank so as not to override existing
+            [emptyvar1,groupspec_rank(:,numgrps)]=sort(dist);               %%Set _rank as rank of all data in terms of distance to spec.
+            groupspec_rank((numpol+1):mlength,numgrps)=0;                   %%0 all those above chosen amount of polylines
+            setappdata(pcpnew,'groupspec_rank',groupspec_rank);
+        end
+        delete(groupnew);
+    end
+end                                                                         %%Next create group controls
+h.gnamem=uicontrol('style','text','units','pixels','position',[454,400-(numgrps-1)*23,52,15],'string',name,'tag',[num2str(numgrps) 'ngroup']);%%Needs position dep numgrp
+h.gedit=uicontrol('style','pushbutton','units','pixels','position',[535,400-(numgrps-1)*23,22,22],'tag',[num2str(numgrps) 'egroup']);
+h.ghide=uicontrol('style','checkbox','units','pixels','position', [579,400-(numgrps-1)*23,22,22],'tag',[num2str(numgrps) 'hgroup']);
+h.gcolset=uicontrol('style','pushbutton','units','pixels','position',[639,400-(numgrps-1)*23,22,22],'tag',[num2str(numgrps) 'csgroup'],'BackgroundColor','red');
+h.gtrans=uicontrol('style','slider','units','pixels','position',[710,400-(numgrps-1)*23,110,17],'tag',[num2str(numgrps) 'tsgroup']);
+h.gremove=uicontrol('style','pushbutton','units','pixels','position',[852,400-(numgrps-1)*23,22,22],'tag',[num2str(numgrps) 'rgroup']);
+h.glines=uicontrol('style','popupmenu','units','pixels','position',[892,400-(numgrps-1)*23,70,22],'tag',[num2str(numgrps) 'lsgroup'],'string',{'dot','dash-dot','dash','solid'},'value',4);
+h.glinew=uicontrol('style','popupmenu','units','pixels','position',[967,400-(numgrps-1)*23,40,22],'tag',[num2str(numgrps) 'lwgroup'],'string',{'0.5','1.0','2.0','3.0','4.0','5.0','6.0','7.0','8.0','9.0','10.0','12.0'});
+set(h.gremove,'callback',{@removegroup,numgrps});                           %%Set new control callbacks and their associated group (numgrps)
+set(h.gcolset,'callback',{@colourselect,numgrps});                          %%Note group number is called as 'a' in the callbacks
+set(h.gedit,'callback',{@editgroup,numgrps});
+
+
+
+
+% --- Function called by rgroup_callback
+% Summary: Remove a group
+% Description:
+%%%% -Gets and removes group a's uicontrols
+%%%% -Gets and moves all higher groups into correct position
+%%%% -Changes the groupspecs to the correct position
+%%%% -Removes group a's (or the extra) groupspecs
+%%%% -Sets new groupspecs and other appdata
+function removegroup(hObject, eventdata, a)                                 %%Delete group buttons and decrease number of groups
+h.gnamem=findobj('-regexp','tag',[num2str(a) 'ngroup']);
+h.gedit=findobj('-regexp','tag',[num2str(a) 'egroup']);
+h.ghide=findobj('-regexp','tag',[num2str(a) 'hgroup']);
+h.gcolset=findobj('-regexp','tag',[num2str(a) 'csgroup']);
+h.gtrans=findobj('-regexp','tag',[num2str(a) 'tsgroup']);
+h.gremove=findobj('-regexp','tag',[num2str(a) 'rgroup']);
+h.glinew=findobj('-regexp','tag',[num2str(a) 'lwgroup']);
+h.glines=findobj('-regexp','tag',[num2str(a) 'lsgroup']);
+delete(h.gnamem,h.gedit,h.ghide,h.gcolset,h.gtrans,h.gremove,h.glinew,h.glines);
+numgrps=getappdata(pcpnew,'numgrps');
+groupspec_str=getappdata(pcpnew,'groupspec_str');                           %Get group's data
+groupspec_num=getappdata(pcpnew,'groupspec_num');
+groupspec_rank=getappdata(pcpnew,'groupspec_rank');
+rangerank=getappdata(pcpnew,'rangerank');
+if numgrps ~= a
+    for i = (a+1):numgrps                                                   %%Move controls
+        h.gnamem=findobj('-regexp','tag',[num2str(i) 'ngroup']);
+        set(h.gnamem,'position',[454,400-(i-2)*23,52,15],'tag',[num2str(i-1) 'ngroup']);
+        h.gedit=findobj('-regexp','tag',[num2str(i) 'egroup']);
+        set(h.gedit,'position',[535,400-(i-2)*23,22,22],'tag',[num2str(i-1) 'egroup'],'callback',{@editgroup,(i-1)});
+        h.ghide=findobj('-regexp','tag',[num2str(i) 'hgroup']);
+        set(h.ghide,'position',[579,400-(i-2)*23,22,22],'tag',[num2str(i-1) 'hgroup']);
+        h.gcolset=findobj('-regexp','tag',[num2str(i) 'csgroup']);
+        set(h.gcolset,'position',[639,400-(i-2)*23,22,22],'tag',[num2str(i-1) 'csgroup'],'callback',{@colourselect,(i-1)});
+        h.gtrans=findobj('-regexp','tag',[num2str(i) 'tsgroup']);
+        set(h.gtrans,'position',[710,400-(i-2)*23,110,17],'tag',[num2str(i-1) 'tsgroup']);
+        h.gremove=findobj('-regexp','tag',[num2str(i) 'rgroup']);
+        set(h.gremove,'position',[852,400-(i-2)*23,22,22],'tag',[num2str(i-1) 'rgroup'],'callback',{@removegroup,(i-1)});
+        h.glines=findobj('-regexp','tag',[num2str(i) 'lsgroup']);
+        set(h.glines,'position',[892,400-(i-2)*23,70,22],'tag',[num2str(i-1) 'lsgroup']);
+        h.glinew=findobj('-regexp','tag',[num2str(i) 'lwgroup']);
+        set(h.glinew,'position',[967,400-(i-2)*23,40,22],'tag',[num2str(i-1) 'lwgroup']);
+        groupspec_str(:,:,i-1)=groupspec_str(:,:,i);
+        groupspec_num(:,:,i-1)=groupspec_num(:,:,i);
+        groupspec_rank(:,i-1)=groupspec_rank(:,i);
+        rangerank(i-1)=rangerank(i);
+    end
+end
+if a == numgrps && numgrps ==1                                              %%If all groups deleted, reset grouspecs to default                                                
+    data_scaled=getappdata(pcpnew,'data_scaled');
+    [mlength,dimnum]=size(data_scaled);
+    groupspec_str(:,:,numgrps)=cell(dimnum,2);
+    groupspec_str(:,:,numgrps)={'Not Specified'};
+    groupspec_rank(:,numgrps)=nan(mlength,1);
+    setappdata(pcpnew,'groupspec_rank',groupspec_rank);
+    setappdata(pcpnew,'groupspec_str',groupspec_str);
+    rangerank(numgrps)=0;
+    setappdata(pcpnew,'rangerank',rangerank);
+    groupspec_num(:,:,numgrps)=zeros(mlength,(dimnum*2));
+    setappdata(pcpnew,'groupspec_num',groupspec_num);
+else
+    groupspec_rank(:,numgrps)=[];                                           %%Delete un-needed grouspecs
+    groupspec_str(:,:,numgrps)=[];
+    groupspec_num(:,:,numgrps)=[];
+    rangerank(numgrps)=[];
+    setappdata(pcpnew,'rangerank',rangerank);                               
+    setappdata(pcpnew,'groupspec_str',groupspec_str);
+    setappdata(pcpnew,'groupspec_num',groupspec_num);
+    setappdata(pcpnew,'groupspec_rank',groupspec_rank);
+end
+numgrps=numgrps-1;                                                          %%Reduce number of groups
+setappdata(pcpnew,'numgrps',numgrps);
+
+% --- Executes on button press in trange.
+% Summary: Toggle group to a range
+% Description:
+%%%% -Gets and sets range/rank on button pressing
+%%%% -Changes visibility of range/rank tables appropriately
+function trange_Callback(hObject, eventdata, handles)
+numgrps=getappdata(pcpnew,'numgrps');
+numgrps=numgrps+1;                                                          %%numgrps must be increased because it is only increased in appdata when group is saved
+rangerank=getappdata(pcpnew,'rangerank');
+rangerank(numgrps)=1;                                                       %%Set rangerank correctly
+setappdata(pcpnew,'rangerank',rangerank);
+h.gtable=findobj('tag','Gspec');                                            %%Toggle visibility of uicontrols
+set(h.gtable,'visible','on');
+h.grtable=findobj('tag','Grspec');
+set(h.grtable,'visible','off');
+h.numpol=findobj('tag','numpol');
+h.pollabel=findobj('tag','pollabel');
+set(h.numpol,'visible','off');
+set(h.pollabel,'visible','off');
+getappdata(groupnew);
+
+% --- Executes on button press in trank.
+% Summary: Toggle group to a rank
+% Description:
+%%%% -Gets and sets range/rank on button pressing
+%%%% -Changes visibility of range/rank tables appropriately
+function trank_Callback(hObject, eventdata, handles)
+numgrps=getappdata(pcpnew,'numgrps');
+numgrps=numgrps+1;                                                          %%numgrps must be increased because it is only increased in appdata when group is saved
+rangerank=getappdata(pcpnew,'rangerank');
+rangerank(numgrps)=0;                                                       %%Set rangerank correctly
+setappdata(pcpnew,'rangerank',rangerank);
+h.gtable=findobj('tag','Gspec');                                            %%Toggle visibility of uicontrols
+set(h.gtable,'visible','off');
+h.grtable=findobj('tag','Grspec');
+set(h.grtable,'visible','on');
+h.numpol=findobj('tag','numpol');
+h.pollabel=findobj('tag','pollabel');
+set(h.numpol,'visible','on');
+set(h.pollabel,'visible','on');
+getappdata(groupnew);
+
+% --- Executes when user attempts to close figure1.
+% Summary: Upon closing without pressing save and close, make sure
+% rangerank is where it should be
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+rangerank=getappdata(pcpnew,'rangerank');
+numgrps=getappdata(pcpnew,'numgrps');
+rangerank(numgrps+1)=[];
+setappdata(pcpnew,'rangerank',rangerank);
+% Hint: delete(hObject) closes the figure
+delete(hObject);
+
+
+%%%%%%%%
+%%% MISC
+%%%%%%%%
+
+
+function gname_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function gname_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function numpol_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function numpol_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

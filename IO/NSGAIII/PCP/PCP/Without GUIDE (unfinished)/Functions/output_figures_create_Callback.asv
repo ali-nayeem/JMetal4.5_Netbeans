@@ -1,0 +1,7 @@
+function output_figures_create_Callback (~,~,~)
+h=evalin('base','h');
+
+h.fig=figure('units','pixels','position',[50,50,600,600],'toolbar','figure','menu','none');
+dcm_obj=datacursormode(h.fig);
+set(dcm_obj,'UpdateFcn',{@dispnames,data_transformed,h.names});
+h.fig_axes=axes('parent',h.fig);
