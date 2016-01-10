@@ -8,6 +8,7 @@ package jmetal.problems.TNDP;
 import jmetal.core.Solution;
 import jmetal.core.Variable;
 import jmetal.encodings.variable.RouteSet;
+import jmetal.operators.crossover.RouteSetCrossover;
 
 /**
  *
@@ -21,14 +22,36 @@ public class Test
         TNDP small = new TNDP(3, new Mandl());
         for (int i = 0; i < 1; i++)
         {
-            Solution newSolution = new Solution(small);
-            Variable[] var  = newSolution.getDecisionVariables();
-            RouteSet rs = (RouteSet)var[0];
+            Solution p1 = new Solution(small);
+            Variable[] var = p1.getDecisionVariables();
+            RouteSet rs = (RouteSet) var[0];
             System.out.println(rs);
             rs.lengthCheck(small);
             rs.ConnectednessCheck(small);
-            small.evaluate(newSolution);
-            System.out.println(newSolution);
+            small.evaluate(p1);
+            System.out.println(p1);
+
+            Solution p2 = new Solution(small);
+            var = p2.getDecisionVariables();
+            rs = (RouteSet) var[0];
+            System.out.println(rs);
+            rs.lengthCheck(small);
+            rs.ConnectednessCheck(small);
+            small.evaluate(p2);
+            System.out.println(p2);
+
+            RouteSetCrossover c = new RouteSetCrossover(null);
+            Solution p[] =
+            {
+                p1, p2
+            };
+            Solution[] offSpring = (Solution[]) c.execute(p);
+            small.evaluate(offSpring[0]);
+            small.evaluateConstraints(offSpring[0]);
+            System.out.println(offSpring[0].getDecisionVariables()[0]);
+            small.evaluate(offSpring[1]);
+            small.evaluateConstraints(offSpring[1]);
+            System.out.println(offSpring[1].getDecisionVariables()[0]);
         }
     }
 }

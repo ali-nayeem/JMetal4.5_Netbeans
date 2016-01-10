@@ -457,7 +457,9 @@ public class TNDP extends Problem
     @Override
     public void evaluateConstraints(Solution solution) throws JMException
     {
-
+        RouteSet rs = (RouteSet) (solution.getDecisionVariables())[0];
+        rs.lengthCheck((TNDP) solution.getProblem());
+        rs.ConnectednessCheck((TNDP) solution.getProblem());
     }
 
     public int getNumberOfRoutes()

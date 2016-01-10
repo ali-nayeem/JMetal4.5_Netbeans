@@ -38,21 +38,19 @@ public class RouteSetSolutionType extends SolutionType
     {
         Variable[] variables = new Variable[1];
         
-        //RouteSet rs = new RouteSet();
-        RouteSet rs = null;
-        try
-        {
-            rs = RouteSet.readFromFile(prob.ins.getRouteFile());
-        } catch (Exception ex)
-        {
-            Logger.getLogger(RouteSetSolutionType.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //rs.generateRouteSet(prob);
+        RouteSet rs = new RouteSet();
+//        RouteSet rs = null;
+//        try
+//        {
+//            rs = RouteSet.readFromFile(prob.ins.getRouteFile());
+//        } catch (Exception ex)
+//        {
+//            Logger.getLogger(RouteSetSolutionType.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        rs.generateRouteSet(prob);
         variables[0] = rs;
 
         return variables;
     }
-
-    
 
 }

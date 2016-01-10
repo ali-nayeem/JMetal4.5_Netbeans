@@ -136,8 +136,14 @@ public class Route
         r.roundTripTime = roundTripTime;
         r.MLS = MLS;
         r.fleetSize = fleetSize;
+        r.waitingTime = waitingTime;
+        r.frequency = frequency;
+        r.converged = converged;
+        r.length = length;
+        r.revCount = revCount;
+        r.addAtEnd = addAtEnd;
         return r;
     }
 
-    
+  
 }

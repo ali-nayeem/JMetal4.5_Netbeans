@@ -33,7 +33,7 @@ public class RouteSet extends Variable
         0, 0, 0
     };// d0,d1,dun => direct , 1-transfer , unsatisfied 
     static double epsilon = 0.1;
-    double totalIVTT;
+   // double totalIVTT;
 
     public static RouteSet readFromFile(String fileName) throws Exception
     {
@@ -271,9 +271,14 @@ public class RouteSet extends Variable
         }
 
         nRs.d = Arrays.copyOf(d, d.length);
-        nRs.totalIVTT = totalIVTT;
+       // nRs.totalIVTT = totalIVTT;
        
         return nRs;
+    }
+
+    public RouteSet copy()
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
