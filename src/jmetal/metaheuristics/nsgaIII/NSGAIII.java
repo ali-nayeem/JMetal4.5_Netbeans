@@ -69,7 +69,7 @@ public class NSGAIII extends Algorithm {
 		while (generations_ < maxGenerations_) {
 			offspringPopulation_ = new SolutionSet(populationSize_);
 			Solution[] parents = new Solution[2];
-			for (int i = 0; i < (populationSize_ ); i++) {
+			for (int i = 0; i < (populationSize_ ); i++) { //MAN
 				if (generations_ < maxGenerations_) {
 					// obtain parents
 
@@ -79,15 +79,15 @@ public class NSGAIII extends Algorithm {
 							.execute(parents);
 
 					mutation_.execute(offSpring[0]);
-					//mutation_.execute(offSpring[1]);
+					//mutation_.execute(offSpring[1]); //MAN
 
 					problem_.evaluate(offSpring[0]);
 					problem_.evaluateConstraints(offSpring[0]);
-					//problem_.evaluate(offSpring[1]);
-					//problem_.evaluateConstraints(offSpring[1]);
+					//problem_.evaluate(offSpring[1]); //MAN
+					//problem_.evaluateConstraints(offSpring[1]); //MAN
 
 					offspringPopulation_.add(offSpring[0]);
-					//offspringPopulation_.add(offSpring[1]);
+					//offspringPopulation_.add(offSpring[1]); //MAN
 
 				} // if
 			} // for

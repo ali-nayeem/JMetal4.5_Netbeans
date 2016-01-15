@@ -284,6 +284,7 @@ public class ThetaDEA extends Algorithm {
 		mutation_.execute(offSpring[0]);
 		
 		problem_.evaluate(offSpring[0]);
+                problem_.evaluateConstraints(offSpring[0]); //MAN
 		
 		
 		offspringPopulation_.add(offSpring[0]);

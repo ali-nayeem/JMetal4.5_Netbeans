@@ -10,6 +10,7 @@ import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.SolutionSet;
 import jmetal.metaheuristics.nsgaIII.NSGAIII;
+import jmetal.metaheuristics.thetadea.ThetaDEA;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
 import jmetal.operators.selection.SelectionFactory;
@@ -18,7 +19,7 @@ import jmetal.operators.selection.SelectionFactory;
  *
  * @author MAN
  */
-public class TestNSGAIII
+public class TestThetaDEA
 {
 
     /**
@@ -31,29 +32,27 @@ public class TestNSGAIII
         Algorithm algorithm; // The algorithm to use
         Operator crossover; // Crossover operator
         Operator mutation; // Mutation operator
-        Operator selection;
 
         problem = new TNDP(4, new Mandl());
-        algorithm = new NSGAIII(problem);
+        algorithm = new ThetaDEA(problem);
         algorithm.setInputParameter("normalize", true);
 
+        algorithm.setInputParameter("theta",5.0);
         algorithm.setInputParameter("div1", 3);
         algorithm.setInputParameter("div2", 2);
 
-        algorithm.setInputParameter("maxGenerations", 700);
+        algorithm.setInputParameter("maxGenerations", 1000);
 
         crossover = new RouteSetCrossover(null);
         mutation = new RouteSetAddDelMutation(null);
-        selection = SelectionFactory.getSelectionOperator("RandomSelection", null);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
         algorithm.addOperator("mutation", mutation);
-        algorithm.addOperator("selection", selection);
         //Bismillah
         SolutionSet population = algorithm.execute();
 
-        population.printFeasibleFUN("TNDP-FUN");
-        population.printFeasibleVAR("TNDP-VAR");
+        population.printFeasibleFUN("ThetaDEA-FUN");
+        population.printFeasibleVAR("ThetaDEA-VAR");
     }
 
 }

@@ -39,8 +39,8 @@ public class SolutionSet implements Serializable {
   /** 
    * Maximum size of the solution set 
    */
-  private int capacity_ = 0; 
-  //private int capacity_ = Integer.MAX_VALUE; //for thetaDEA
+  //private int capacity_ = 0; 
+  private int capacity_ = Integer.MAX_VALUE; //for thetaDEA
 
   /**
    * Constructor.
