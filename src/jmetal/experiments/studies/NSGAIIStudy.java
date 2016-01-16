@@ -101,9 +101,9 @@ public class NSGAIIStudy extends Experiment {
     
     int numberOfAlgorithms = exp.algorithmNameList_.length ;
 
-    exp.experimentBaseDirectory_ = "/Users/antelverde/Softw/pruebas/jmetal/" +
+    exp.experimentBaseDirectory_ = "exp" +
                                    exp.experimentName_;
-    exp.paretoFrontDirectory_ = "/Users/antelverde/Softw/pruebas/data/paretoFronts";
+    exp.paretoFrontDirectory_ = "exp/paretoFronts";
     
     exp.algorithmSettings_ = new Settings[numberOfAlgorithms] ;
     
@@ -113,7 +113,7 @@ public class NSGAIIStudy extends Experiment {
 
     // Run the experiments
     int numberOfThreads ;
-    exp.runExperiment(numberOfThreads = 6) ;
+    exp.runExperiment(numberOfThreads = 4) ;
 
     exp.generateQualityIndicators() ;
     

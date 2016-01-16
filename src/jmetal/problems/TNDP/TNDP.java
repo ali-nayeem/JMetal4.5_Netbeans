@@ -49,7 +49,7 @@ public class TNDP extends Problem
         numberOfVariables_ = 1;
         numberOfObjectives_ = 7;
         numberOfConstraints_ = 2;
-        problemName_ = ins.getName();
+        problemName_ = ins.getName() + "-" +_numOfRoutes;
         demand = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
         time = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
         solutionType_ = new RouteSetSolutionType(this);

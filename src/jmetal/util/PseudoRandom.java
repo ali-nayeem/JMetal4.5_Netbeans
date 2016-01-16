@@ -54,7 +54,7 @@ public class PseudoRandom
      *
      * @return A random int value.
      */
-    public static int randInt()
+    public static synchronized int randInt()
     {
         if (random_ == null)
         {
@@ -67,7 +67,7 @@ public class PseudoRandom
      * Returns a random double value using the PseudoRandom generator. Returns A
      * random double value.
      */
-    public static double randDouble()
+    public static synchronized double randDouble()
     {
         if (random_ == null)
         {
@@ -86,7 +86,7 @@ public class PseudoRandom
      * @param maxBound The maximum bound. Return A pseudo random int value
      * between minBound and maxBound.
      */
-    public static int randInt(int minBound, int maxBound)
+    public static synchronized int randInt(int minBound, int maxBound)
     {
         if (random_ == null)
         {
@@ -104,7 +104,7 @@ public class PseudoRandom
      * @param maxBound The maximum bound.
      * @return A pseudo random double value between minBound and maxBound
      */
-    public static double randDouble(double minBound, double maxBound)
+    public static synchronized double randDouble(double minBound, double maxBound)
     {
         if (random_ == null)
         {
@@ -116,7 +116,7 @@ public class PseudoRandom
     
     //MAN 
     //from 0 to (i-1)
-    public static int nextInt(int i)
+    public static synchronized int nextInt(int i)
     {
         if (random_ == null)
         {
@@ -124,7 +124,7 @@ public class PseudoRandom
         }
         return random_.nextInt(i);
     }
-    public static int roulette_wheel(double[] vec, double total)
+    public static synchronized int roulette_wheel(double[] vec, double total)
     {
         if (total == 0)
         { // count
@@ -142,7 +142,7 @@ public class PseudoRandom
         return --i;
     }
     // Implementing Fisher–Yates shuffle
-  public static void shuffleArray(int[] ar)
+  public static synchronized void shuffleArray(int[] ar)
   {
     for (int i = ar.length - 1; i > 0; i--)
     {
