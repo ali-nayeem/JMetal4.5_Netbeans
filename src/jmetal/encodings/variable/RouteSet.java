@@ -73,10 +73,12 @@ public class RouteSet extends Variable
     @Override
     public String toString()
     {
+        ArrayList<Route> copy = new ArrayList<>(routeSet);
+        Collections.sort(copy);
         String s = "";
         for (int i = 0; i < size(); i++)
         {
-            s += getRoute(i).toString();
+            s += copy.get(i).toString();
         }
         return s;
     }

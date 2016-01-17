@@ -40,7 +40,7 @@ public class TestNSGAIII
         algorithm.setInputParameter("div1", 3);
         algorithm.setInputParameter("div2", 2);
 
-        algorithm.setInputParameter("maxGenerations", 700);
+        algorithm.setInputParameter("maxGenerations", 10);
 
         crossover = new RouteSetCrossover(null);
         mutation = new RouteSetAddDelMutation(null);

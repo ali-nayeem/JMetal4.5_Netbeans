@@ -6,12 +6,13 @@
 package jmetal.encodings.variable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  *
  * @author MAN
  */
-public class Route
+public class Route implements Comparable
 {
 
     public ArrayList<Integer> nodeList = new ArrayList<>();
@@ -28,7 +29,7 @@ public class Route
     boolean converged = false;
     private double waitingTime;
     private double length = -1;
-    
+
     int revCount = 0;
     boolean addAtEnd = true;
 
@@ -73,15 +74,15 @@ public class Route
 
     public double calculateFleetSize()
     {
-        if(revFreq == -1)
-       {
-           throw new Error("Attempt to calculate FleetSize before frequency calculaution");
-       }
+        if (revFreq == -1)
+        {
+            throw new Error("Attempt to calculate FleetSize before frequency calculaution");
+        }
         fleetSize = Math.ceil(frequency * roundTripTime / 60.0);
         return fleetSize;
     }
 
-    public double calculateRouteLength_RoundTrip_edgeOverlap(int [][] time, int[][] edgeUsage)
+    public double calculateRouteLength_RoundTrip_edgeOverlap(int[][] time, int[][] edgeUsage)
     {
         roundTripTime = 0;
         for (int i = 1; i < nodeList.size(); i++)
@@ -94,25 +95,28 @@ public class Route
         roundTripTime = 2 * roundTripTime;
         return length;
     }
+
     public double getLength()
     {
-        if(length == -1)
+        if (length == -1)
         {
             throw new Error("Attempt to get route length before calculaution");
         }
         return length;
-            
+
     }
-   public double calculateWaitingTime()
-   {
-       if(revFreq == -1)
-       {
-           throw new Error("Attempt to calculate waiting time before frequency calculaution");
-       }
-       waitingTime = 60.0 / (2.0 * frequency) ;
-       return waitingTime;
-   }
-   public int size()
+
+    public double calculateWaitingTime()
+    {
+        if (revFreq == -1)
+        {
+            throw new Error("Attempt to calculate waiting time before frequency calculaution");
+        }
+        waitingTime = 60.0 / (2.0 * frequency);
+        return waitingTime;
+    }
+
+    public int size()
     {
         return nodeList.size();
     }
@@ -120,7 +124,17 @@ public class Route
     @Override
     public String toString()
     {
-        return nodeList.toString();
+        int s = nodeList.get(0);
+        int e = nodeList.get(nodeList.size() - 1);
+        if (e < s)
+        {
+            ArrayList<Integer> copy = new ArrayList<>(nodeList);
+            Collections.reverse(copy);
+            return copy.toString();
+        } else
+        {
+            return nodeList.toString();
+        }
     }
 
     public Route deepCopy()
@@ -145,5 +159,11 @@ public class Route
         return r;
     }
 
-  
+    @Override
+    public int compareTo(Object o)
+    {
+        Route or = (Route) o;
+        return or.nodeList.size() - nodeList.size();
+    }
+
 }
