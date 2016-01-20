@@ -55,14 +55,14 @@ public class TNDPExp extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp exp = new TNDPExp();
-        exp.experimentName_ = "ExpSingleThreadedSyncedRandom";
+        exp.experimentName_ = "ExpM0ST20Runs";
         exp.algorithmNameList_ = new String[] //Can be extended
         {
             "NSGAIII"
         };
         exp.problemList_ = new String[] //Can be extended
         {
-            "Mandl-4"
+            "M0-12"
         };
 
         exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
