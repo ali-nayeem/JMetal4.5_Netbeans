@@ -1,1 +1,8 @@
-/dist/
+dist/*
+build/*
+nbproject/*
+.dep.inc
+*.exe
+*.[oa]
+*.csv
+~*
