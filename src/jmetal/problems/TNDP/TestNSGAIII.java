@@ -12,7 +12,7 @@ import jmetal.core.SolutionSet;
 import jmetal.metaheuristics.nsgaIII.NSGAIII;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
-import jmetal.operators.selection.SelectionFactory;
+//import jmetal.operators.selection.SelectionFactory;
 
 /**
  *
@@ -33,7 +33,7 @@ public class TestNSGAIII
         Operator mutation; // Mutation operator
         Operator selection;
 
-        problem = new TNDP(12, new M0());
+        problem = new TNDP(3, new Small());
         algorithm = new NSGAIII(problem);
         algorithm.setInputParameter("normalize", true);
 
@@ -44,7 +44,7 @@ public class TestNSGAIII
 
         crossover = new RouteSetCrossover(null);
         mutation = new RouteSetAddDelMutation(null);
-        selection = SelectionFactory.getSelectionOperator("RandomSelection", null);
+        selection = new RetativeTournamentSelection(null);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
         algorithm.addOperator("mutation", mutation);
