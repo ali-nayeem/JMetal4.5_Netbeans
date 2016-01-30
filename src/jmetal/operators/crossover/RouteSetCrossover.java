@@ -31,10 +31,18 @@ public class RouteSetCrossover extends Crossover
 
     private static final List VALID_TYPES = Arrays.asList(RouteSetSolutionType.class);
     private int numOfOffspring = 1;
+    private double crossoverProbability_ = 1.0;
 
     public RouteSetCrossover(HashMap<String, Object> parameters)
     {
         super(parameters);
+        if (parameters != null)
+        {
+            if (parameters.get("probability") != null)
+            {
+                crossoverProbability_ = (Double) parameters.get("probability");
+            }
+        }
     }
 
     @Override
@@ -60,9 +68,22 @@ public class RouteSetCrossover extends Crossover
             throw new JMException("Exception in " + name + ".execute()");
         } // if 
 
-        Solution[] offSpring;
-        offSpring = doCrossover(parents[0], parents[1]);
-        return offSpring;
+        if (crossoverProbability_ >= PseudoRandom.randDouble())
+        {
+            Solution[] offSpring;
+            offSpring = doCrossover(parents[0], parents[1]);
+            return offSpring;
+        }
+        else
+        {
+            Solution[] offSpring = new Solution[numOfOffspring];
+            for (int i = 0; i < numOfOffspring; i++)
+            {
+                offSpring[i] = new Solution(parents[i]);
+            }
+            return offSpring;
+        }
+
     }
 
     private Solution[] doCrossover(Solution parent1, Solution parent2)
@@ -75,7 +96,7 @@ public class RouteSetCrossover extends Crossover
 
         Solution[] offSpring = new Solution[numOfOffspring];
 
-        Variable[] vars1 = new Variable[1];        
+        Variable[] vars1 = new Variable[1];
         vars1[0] = rsOffspring[0];
         offSpring[0] = new Solution(parent1.getProblem(), vars1);
 
@@ -99,75 +120,75 @@ public class RouteSetCrossover extends Crossover
         {
             boolean feasible = false;
             int attempt = 0;
-           // do //untill a feasible child is found
-           // {
-                if (count == 0 && attempt > 0)
-                {
-                    parentCopy[0] = (RouteSet) parent[0].deepCopy();
-                }
-                children[count] = new RouteSet();
-                Set<Integer> chosen = new HashSet<>();
-                int curParent = count;
-                int randomindex = PseudoRandom.nextInt(parentCopy[curParent].size());
-                Route r = parentCopy[curParent].getRoute(randomindex);
-                if (count == 0)
-                {
-                    //removedRoute = r;
-                    parentCopy[0].routeSet.remove(randomindex);
-                }
+            // do //untill a feasible child is found
+            // {
+            if (count == 0 && attempt > 0)
+            {
+                parentCopy[0] = (RouteSet) parent[0].deepCopy();
+            }
+            children[count] = new RouteSet();
+            Set<Integer> chosen = new HashSet<>();
+            int curParent = count;
+            int randomindex = PseudoRandom.nextInt(parentCopy[curParent].size());
+            Route r = parentCopy[curParent].getRoute(randomindex);
+            if (count == 0)
+            {
+                //removedRoute = r;
+                parentCopy[0].routeSet.remove(randomindex);
+            }
 
-                children[count].routeSet.add(r.deepCopy());
-                chosen.addAll(r.nodeList);
+            children[count].routeSet.add(r.deepCopy());
+            chosen.addAll(r.nodeList);
 
-                while (children[count].size() < routeSetSize)
+            while (children[count].size() < routeSetSize)
+            {
+                curParent = (curParent + 1) % 2; //pick routes from 2 parentCopy alternatively
+                ArrayList<Route> eligileRoutes = new ArrayList<>();
+                ArrayList<Double> props = new ArrayList<>();
+
+                for (int i = 0; i < parentCopy[curParent].size(); i++)
                 {
-                    curParent = (curParent + 1) % 2; //pick routes from 2 parentCopy alternatively
-                    ArrayList<Route> eligileRoutes = new ArrayList<>();
-                    ArrayList<Double> props = new ArrayList<>();
-
-                    for (int i = 0; i < parentCopy[curParent].size(); i++)
+                    Route cr = parentCopy[curParent].getRoute(i);
+                    Set<Integer> commonNodes = intersect(chosen, new HashSet<>(cr.nodeList));
+                    if (!commonNodes.isEmpty())
                     {
-                        Route cr = parentCopy[curParent].getRoute(i);
-                        Set<Integer> commonNodes = intersect(chosen, new HashSet<>(cr.nodeList));
-                        if (!commonNodes.isEmpty())
-                        {
-                            eligileRoutes.add(cr);
-                            props.add(1.0 * (cr.size() - commonNodes.size()) / cr.size());
-                        }
+                        eligileRoutes.add(cr);
+                        props.add(1.0 * (cr.size() - commonNodes.size()) / cr.size());
                     }
-                    if (eligileRoutes.isEmpty())
-                    {
-                        continue;
-                        //throw new Error("Eligible list empty");
-                    }
-                    double maxProp = Collections.max(props);
-                    ArrayList<Integer> maxIndices = new ArrayList<>();
+                }
+                if (eligileRoutes.isEmpty())
+                {
+                    continue;
+                    //throw new Error("Eligible list empty");
+                }
+                double maxProp = Collections.max(props);
+                ArrayList<Integer> maxIndices = new ArrayList<>();
 
-                    for (int i = 0; i < eligileRoutes.size(); i++)
+                for (int i = 0; i < eligileRoutes.size(); i++)
+                {
+                    if (props.get(i) == maxProp)
                     {
-                        if (props.get(i) == maxProp)
-                        {
-                            // maxProp = props.get(i);
-                            // maxPropIndex = i;
-                            maxIndices.add(i);
-                        }
+                        // maxProp = props.get(i);
+                        // maxPropIndex = i;
+                        maxIndices.add(i);
                     }
-                    int maxPropIndex = maxIndices.get(PseudoRandom.nextInt(maxIndices.size()));
-                    Route sr = eligileRoutes.get(maxPropIndex);
-                    //parents[curParent].routeSet.remove(sr);
-                    children[count].routeSet.add(sr.deepCopy());
-                    chosen.addAll(sr.nodeList);
                 }
-                if (chosen.size() < Vertices)
-                {
-                    feasible = children[count].repair(chosen, prob);
-                } else
-                {
-                    feasible = true;
-                }
-                attempt++;
-                //System.out.print(attempt + ",");
-           // } while (!feasible);
+                int maxPropIndex = maxIndices.get(PseudoRandom.nextInt(maxIndices.size()));
+                Route sr = eligileRoutes.get(maxPropIndex);
+                //parents[curParent].routeSet.remove(sr);
+                children[count].routeSet.add(sr.deepCopy());
+                chosen.addAll(sr.nodeList);
+            }
+            if (chosen.size() < Vertices)
+            {
+                feasible = children[count].repair(chosen, prob);
+            } else
+            {
+                feasible = true;
+            }
+            attempt++;
+            //System.out.print(attempt + ",");
+            // } while (!feasible);
         }
 
         return children;
