@@ -73,7 +73,8 @@ public class RouteSetCrossover extends Crossover
             Solution[] offSpring;
             offSpring = doCrossover(parents[0], parents[1]);
             return offSpring;
-        } else
+        } 
+        else
         {
             Solution[] offSpring = new Solution[numOfOffspring];
             offSpring[0] = new Solution(parents[0]);
