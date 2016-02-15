@@ -29,7 +29,7 @@ public class RouteSetXchangelMutation extends Mutation
 
     private Double mutationProbability_ = 1.0;
     private Double addProbability = 0.5;
-    public static int addCount = 0;
+    //public static int addCount = 0;
 
     public RouteSetXchangelMutation(HashMap<String, Object> parameters)
     {

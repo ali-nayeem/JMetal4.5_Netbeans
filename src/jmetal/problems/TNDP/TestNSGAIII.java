@@ -13,6 +13,7 @@ import jmetal.metaheuristics.nsgaIII.NSGAIII;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
 import jmetal.operators.mutation.RouteSetDelMutation;
+import jmetal.operators.mutation.RouteSetGuidedMutation;
 import jmetal.operators.mutation.RouteSetTELMutation;
 import jmetal.operators.mutation.RouteSetTEOMutation;
 import jmetal.operators.mutation.RouteSetXchangelMutation;
@@ -47,7 +48,7 @@ public class TestNSGAIII
         algorithm.setInputParameter("maxGenerations", 700);
 
         crossover = new RouteSetCrossover(null);
-        mutation = new RouteSetXchangelMutation(null);
+        mutation = new RouteSetGuidedMutation(null,problem);
         selection = new RetativeTournamentSelection(null);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);

@@ -60,7 +60,7 @@ public class TNDP extends Problem
         EdgeListReader.alterGraph(g, fml, false, false, null);
     }
 
-    public class OBJECTIVES
+    public static class OBJECTIVES
     {
 
         public static final int IVTT = 0, WT = 1, TP = 2, UP = 3, FS = 4, RL = 5, DO = 6;
