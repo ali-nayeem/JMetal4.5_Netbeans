@@ -7,7 +7,6 @@ package jmetal.operators.mutation;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -203,7 +202,6 @@ public class RouteSetTEOMutation extends Mutation
                     }
                 }
             }
-            
         }
     }
 

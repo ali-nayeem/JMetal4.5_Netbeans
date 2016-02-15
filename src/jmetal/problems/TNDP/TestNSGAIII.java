@@ -15,6 +15,7 @@ import jmetal.operators.mutation.RouteSetAddDelMutation;
 import jmetal.operators.mutation.RouteSetDelMutation;
 import jmetal.operators.mutation.RouteSetTELMutation;
 import jmetal.operators.mutation.RouteSetTEOMutation;
+import jmetal.operators.mutation.RouteSetXchangelMutation;
 //import jmetal.operators.selection.SelectionFactory;
 
 /**
@@ -36,7 +37,7 @@ public class TestNSGAIII
         Operator mutation; // Mutation operator
         Operator selection;
 
-        problem = new TNDP(3, new Small());
+        problem = new TNDP(4, new Mandl());
         algorithm = new NSGAIII(problem);
         algorithm.setInputParameter("normalize", true);
 
@@ -46,7 +47,7 @@ public class TestNSGAIII
         algorithm.setInputParameter("maxGenerations", 700);
 
         crossover = new RouteSetCrossover(null);
-        mutation = new RouteSetTEOMutation(null);
+        mutation = new RouteSetXchangelMutation(null);
         selection = new RetativeTournamentSelection(null);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
