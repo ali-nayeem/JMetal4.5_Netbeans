@@ -507,5 +507,9 @@ public class TNDP extends Problem
         sc.close();
         return sum / 2;
     }
+    public int[][] getTime()
+    {
+        return time;
+    }
 
 }

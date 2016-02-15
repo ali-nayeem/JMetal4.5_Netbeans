@@ -12,6 +12,8 @@ import jmetal.core.SolutionSet;
 import jmetal.metaheuristics.nsgaIII.NSGAIII;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
+import jmetal.operators.mutation.RouteSetDelMutation;
+import jmetal.operators.mutation.RouteSetTELMutation;
 //import jmetal.operators.selection.SelectionFactory;
 
 /**
@@ -40,10 +42,10 @@ public class TestNSGAIII
         algorithm.setInputParameter("div1", 3);
         algorithm.setInputParameter("div2", 2);
 
-        algorithm.setInputParameter("maxGenerations", 50);
+        algorithm.setInputParameter("maxGenerations", 700);
 
         crossover = new RouteSetCrossover(null);
-        mutation = new RouteSetAddDelMutation(null);
+        mutation = new RouteSetTELMutation(null);
         selection = new RetativeTournamentSelection(null);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
