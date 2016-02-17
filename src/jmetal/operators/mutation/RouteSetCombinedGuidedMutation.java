@@ -5,27 +5,14 @@
  */
 package jmetal.operators.mutation;
 
-import grph.Grph;
-import grph.in_memory.InMemoryGrph;
-import java.util.ArrayList;
 import java.util.Arrays;
-import jmetal.operators.mutation.RouteSetAddDelMutation;
-import jmetal.operators.mutation.RouteSetDelMutation;
-import jmetal.operators.mutation.RouteSetTELMutation;
-import jmetal.operators.mutation.RouteSetTEOMutation;
-import jmetal.operators.mutation.RouteSetXchangelMutation;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.encodings.solutionType.RouteSetSolutionType;
-import jmetal.encodings.variable.Route;
-import jmetal.encodings.variable.RouteSet;
 import jmetal.problems.TNDP.TNDP;
-import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
 
@@ -33,10 +20,10 @@ import jmetal.util.PseudoRandom;
  *
  * @author MAN
  */
-public class RouteSetGuidedMutation extends Mutation
+public class RouteSetCombinedGuidedMutation extends Mutation
 {
 
-    private static final List VALID_TYPES = Arrays.asList(RouteSetSolutionType.class);
+    //private static final List VALID_TYPES = Arrays.asList(RouteSetSolutionType.class);
 
     RouteSetAddlMutation Add = new RouteSetAddlMutation(null);
     RouteSetDelMutation Del = new RouteSetDelMutation(null);
@@ -45,7 +32,7 @@ public class RouteSetGuidedMutation extends Mutation
     RouteSetXchangelMutation Xchange = new RouteSetXchangelMutation(null);
     Operator [][] ObjWiseMut ;
 
-    public RouteSetGuidedMutation(HashMap<String, Object> parameters, Problem prob )
+    public RouteSetCombinedGuidedMutation(HashMap<String, Object> parameters, Problem prob )
     {
         super(parameters);
         ObjWiseMut = new Operator[prob.getNumberOfObjectives()+1][];

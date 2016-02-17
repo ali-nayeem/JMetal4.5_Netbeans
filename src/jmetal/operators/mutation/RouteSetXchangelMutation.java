@@ -52,15 +52,7 @@ public class RouteSetXchangelMutation extends Mutation
     {
         Solution solution = (Solution) object;
 
-        if (!VALID_TYPES.contains(solution.getType().getClass()))
-        {
-            Configuration.logger_.severe("RouteSetAddDelMutation.execute: the solution "
-                    + "type " + solution.getType() + " is not allowed with this operator");
-
-            Class cls = java.lang.String.class;
-            String name = cls.getName();
-            throw new JMException("Exception in " + name + ".execute()");
-        } // if 
+        
         doMutation(solution);
         return solution;
     }

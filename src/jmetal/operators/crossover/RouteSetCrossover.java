@@ -68,7 +68,7 @@ public class RouteSetCrossover extends Crossover
             throw new JMException("Exception in " + name + ".execute()");
         } // if 
 
-        if (crossoverProbability_ >= PseudoRandom.randDouble())
+        if (crossoverProbability_ > PseudoRandom.randDouble())
         {
             Solution[] offSpring;
             offSpring = doCrossover(parents[0], parents[1]);

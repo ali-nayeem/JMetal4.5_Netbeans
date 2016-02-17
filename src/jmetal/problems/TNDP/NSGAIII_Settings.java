@@ -12,8 +12,10 @@ import jmetal.experiments.Settings;
 import jmetal.metaheuristics.nsgaIII.NSGAIII;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
+import jmetal.operators.mutation.RouteSetCombinedGuidedMutation;
+import jmetal.operators.mutation.RouteSetCombinedRandomMutation;
+import jmetal.operators.selection.RandomSelection;
 import jmetal.operators.selection.SelectionFactory;
-import jmetal.problems.ProblemFactory;
 import jmetal.util.JMException;
 
 /**
@@ -25,10 +27,15 @@ public class NSGAIII_Settings extends Settings
 
     public int populationSize_;
     public int maxGenerations_;
+    public String mutationName_;
+    public String SelectionName_;
     public double mutationProbability_;
-    public Double addProbability_ ;
+    public double crossoverProbability_;
+    public double addProbability_;
     public int div1_;
     public int div2_;
+
+    private HashMap<String, Operator> ListOfMutAndSel = new HashMap<>();
 
     public NSGAIII_Settings(String ins)
     {
@@ -38,16 +45,24 @@ public class NSGAIII_Settings extends Settings
         try
         {
             String[] probName = ins.split("-");
-            Class instance = Class.forName("jmetal.problems.TNDP."+probName[0]);
-            problem_ = new TNDP(Integer.parseInt(probName[1]),(Instance) instance.newInstance());
+            Class instance = Class.forName("jmetal.problems.TNDP." + probName[0]);
+            problem_ = new TNDP(Integer.parseInt(probName[1]), (Instance) instance.newInstance());
         } catch (Exception e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        ListOfMutAndSel.put("RouteSetAddDelMutation", new RouteSetAddDelMutation(null));
+        ListOfMutAndSel.put("RouteSetCombinedGuidedMutation", new RouteSetCombinedGuidedMutation(null, problem_));
+        ListOfMutAndSel.put("RouteSetCombinedRandomMutation", new RouteSetCombinedRandomMutation(null));
+        ListOfMutAndSel.put("RandomSelection", new RandomSelection(null));
+        ListOfMutAndSel.put("RetativeTournamentSelection", new RetativeTournamentSelection(null));
         // Default experiments.settings
-        maxGenerations_ = 700;
+        maxGenerations_ = 500;
         mutationProbability_ = 1.0;
+        crossoverProbability_ = 1.0;
+        mutationName_ = "RouteSetAddDelMutation";
+        SelectionName_ = "RandomSelection";
         addProbability_ = 0.5;
         div1_ = 3;
         div2_ = 2;
@@ -61,6 +76,8 @@ public class NSGAIII_Settings extends Settings
         Operator mutation; // Mutation operator
         Operator selection;
 
+        HashMap parameters; // Operator parameters
+
         algorithm = new NSGAIII(problem_);
         algorithm.setInputParameter("normalize", true);
 
@@ -69,14 +86,17 @@ public class NSGAIII_Settings extends Settings
 
         algorithm.setInputParameter("maxGenerations", maxGenerations_);
 
-        crossover = new RouteSetCrossover(null);
-        
-        HashMap parameters = new HashMap();
-        parameters.put("probability", mutationProbability_);
-        parameters.put("addProbability", addProbability_);
-        mutation = new RouteSetAddDelMutation(parameters);
-        
-        selection = SelectionFactory.getSelectionOperator("RandomSelection", null);
+        parameters = new HashMap();
+        parameters.put("probability", crossoverProbability_);
+        crossover = new RouteSetCrossover(parameters);
+
+//        parameters = new HashMap();
+//        parameters.put("probability", mutationProbability_);
+//        parameters.put("addProbability", addProbability_);
+//        mutation = new RouteSetAddDelMutation(parameters);
+        mutation = ListOfMutAndSel.get(mutationName_);
+
+        selection = ListOfMutAndSel.get(SelectionName_);
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
         algorithm.addOperator("mutation", mutation);

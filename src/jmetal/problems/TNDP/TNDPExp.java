@@ -21,7 +21,6 @@ import jmetal.util.JMException;
 public class TNDPExp extends Experiment
 {
 
-
     @Override
     public synchronized void algorithmSettings(String problemName, int problemId, Algorithm[] algorithm) throws ClassNotFoundException
     {
@@ -55,14 +54,14 @@ public class TNDPExp extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp exp = new TNDPExp();
-        exp.experimentName_ = "ExpM1ST20Runs";
+        exp.experimentName_ = "ExpSmall";
         exp.algorithmNameList_ = new String[] //Can be extended
         {
             "NSGAIII"
         };
         exp.problemList_ = new String[] //Can be extended
         {
-            "M1-15"
+            "Small-3"
         };
 
         exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 

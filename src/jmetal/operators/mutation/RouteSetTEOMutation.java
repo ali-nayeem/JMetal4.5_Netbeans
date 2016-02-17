@@ -51,15 +51,7 @@ public class RouteSetTEOMutation extends Mutation
     {
         Solution solution = (Solution) object;
 
-        if (!VALID_TYPES.contains(solution.getType().getClass()))
-        {
-            Configuration.logger_.severe("RouteSetAddDelMutation.execute: the solution "
-                    + "type " + solution.getType() + " is not allowed with this operator");
-
-            Class cls = java.lang.String.class;
-            String name = cls.getName();
-            throw new JMException("Exception in " + name + ".execute()");
-        } // if 
+       
         doMutation(solution);
         return solution;
     }
@@ -157,7 +149,7 @@ public class RouteSetTEOMutation extends Mutation
                         // k++;
                         continue;
                     }
-                    if ( (time[a][c] < Integer.MAX_VALUE) && edgeUsage[a][c] < (edgeUsage[a][b] + edgeUsage[b][c]) )
+                    if ( (time[a][c] < Integer.MAX_VALUE) && (edgeUsage[a][c]+1)*time[a][c] < ( (edgeUsage[a][b]-1)*time[a][b] + (edgeUsage[b][c]-1)*time[b][c] ) )
                     {
                         if (canBeDeleted(rIndex[i], rAdjMat, reducedGraph, nodeDistib[b]))
                         {
