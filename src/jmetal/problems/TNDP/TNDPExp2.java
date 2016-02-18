@@ -61,7 +61,7 @@ public class TNDPExp2 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp2 exp = new TNDPExp2();
-        exp.experimentName_ = "ExpMandl4All";
+        exp.experimentName_ = "ExpM0All";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -82,7 +82,7 @@ public class TNDPExp2 extends Experiment
         
         exp.problemList_ = new String[] //Can be extended
         {
-            "Mandl-4"
+            "M0-12"
         };
 
         exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
