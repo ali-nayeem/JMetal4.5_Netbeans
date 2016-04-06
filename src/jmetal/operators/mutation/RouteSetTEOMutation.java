@@ -177,7 +177,7 @@ public class RouteSetTEOMutation extends Mutation
                     {
                         continue;
                     }
-                    if ( (time[a][c] < Integer.MAX_VALUE) && edgeUsage[a][c] < (edgeUsage[a][b] + edgeUsage[b][c]) )
+                    if ( (time[a][c] < Integer.MAX_VALUE) && (edgeUsage[a][c]+1)*time[a][c] < ( (edgeUsage[a][b]-1)*time[a][b] + (edgeUsage[b][c]-1)*time[b][c] ) )
                     {
                         if (canBeDeleted(rIndex[i], rAdjMat, reducedGraph, nodeDistib[b]))
                         {
