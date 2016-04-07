@@ -11,7 +11,10 @@ import jmetal.core.Operator;
 import jmetal.experiments.Settings;
 import jmetal.metaheuristics.nsgaIII.NSGAIII;
 import jmetal.operators.crossover.RouteSetCrossover;
+import jmetal.operators.mutation.RouteSetAddDelRand;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
+import jmetal.operators.mutation.RouteSetAddDelTELRand;
+import jmetal.operators.mutation.RouteSetAddDelTEORand;
 import jmetal.operators.mutation.RouteSetCombinedGuidedMutation;
 import jmetal.operators.mutation.RouteSetCombinedRandomMutation;
 import jmetal.operators.selection.RandomSelection;
@@ -55,6 +58,9 @@ public class NSGAIII_Settings extends Settings
         ListOfMutAndSel.put("RouteSetAddDelMutation", new RouteSetAddDelMutation(null));
         ListOfMutAndSel.put("RouteSetCombinedGuidedMutation", new RouteSetCombinedGuidedMutation(null, problem_));
         ListOfMutAndSel.put("RouteSetCombinedRandomMutation", new RouteSetCombinedRandomMutation(null));
+        ListOfMutAndSel.put("RouteSetAddDelRand", new RouteSetAddDelRand(null));
+        ListOfMutAndSel.put("RouteSetAddDelTELRand", new RouteSetAddDelTELRand(null));
+        ListOfMutAndSel.put("RouteSetAddDelTEORand", new RouteSetAddDelTEORand(null));
         ListOfMutAndSel.put("RandomSelection", new RandomSelection(null));
         ListOfMutAndSel.put("RetativeTournamentSelection", new RetativeTournamentSelection(null));
         // Default experiments.settings

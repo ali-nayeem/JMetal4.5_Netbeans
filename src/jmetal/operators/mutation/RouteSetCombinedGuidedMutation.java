@@ -29,21 +29,21 @@ public class RouteSetCombinedGuidedMutation extends Mutation
     RouteSetDelMutation Del = new RouteSetDelMutation(null);
     RouteSetTELMutation TEL = new RouteSetTELMutation(null);
     RouteSetTEOMutation TEO = new RouteSetTEOMutation(null);
-    RouteSetXchangelMutation Xchange = new RouteSetXchangelMutation(null);
+    //RouteSetXchangelMutation Xchange = new RouteSetXchangelMutation(null);
     Operator [][] ObjWiseMut ;
 
     public RouteSetCombinedGuidedMutation(HashMap<String, Object> parameters, Problem prob )
     {
         super(parameters);
         ObjWiseMut = new Operator[prob.getNumberOfObjectives()+1][];
-        ObjWiseMut[TNDP.OBJECTIVES.IVTT] = new Operator[]{TEL, Xchange};
-        ObjWiseMut[TNDP.OBJECTIVES.TP] = new Operator[]{Add, Xchange};
-        ObjWiseMut[TNDP.OBJECTIVES.UP] = new Operator[]{Add, Xchange};
+        ObjWiseMut[TNDP.OBJECTIVES.IVTT] = new Operator[]{TEL};
+        ObjWiseMut[TNDP.OBJECTIVES.TP] = new Operator[]{Add};
+        ObjWiseMut[TNDP.OBJECTIVES.UP] = new Operator[]{Add};
         ObjWiseMut[TNDP.OBJECTIVES.RL] = new Operator[]{TEL, Del};
         ObjWiseMut[TNDP.OBJECTIVES.DO] = new Operator[]{TEO, Del};
-        ObjWiseMut[TNDP.OBJECTIVES.WT] = new Operator[]{Add, Del, TEL, TEO, Xchange};
-        ObjWiseMut[TNDP.OBJECTIVES.FS] = new Operator[]{Add, Del, TEL, TEO, Xchange};
-        ObjWiseMut[ObjWiseMut.length-1] = new Operator[]{Add, Del, TEL, TEO, Xchange};
+        ObjWiseMut[TNDP.OBJECTIVES.WT] = new Operator[]{Add, Del};
+        ObjWiseMut[TNDP.OBJECTIVES.FS] = new Operator[]{Add, Del};
+        ObjWiseMut[ObjWiseMut.length-1] = new Operator[]{Add, Del};
         
     }
 

@@ -20,7 +20,7 @@ import jmetal.util.PseudoRandom;
  *
  * @author MAN
  */
-public class RouteSetCombinedRandomMutation extends Mutation
+public class RouteSetAddDelRand extends Mutation
 {
 
     //private static final List VALID_TYPES = Arrays.asList(RouteSetSolutionType.class);
@@ -32,10 +32,10 @@ public class RouteSetCombinedRandomMutation extends Mutation
     //RouteSetXchangelMutation Xchange = new RouteSetXchangelMutation(null);
     Operator [] ListOfMut ;
 
-    public RouteSetCombinedRandomMutation(HashMap<String, Object> parameters )
+    public RouteSetAddDelRand(HashMap<String, Object> parameters )
     {
         super(parameters);
-        ListOfMut = new Operator[]{Add, Del, TEL, TEO};
+        ListOfMut = new Operator[]{Add, Del};
         
     }
 

@@ -16,8 +16,6 @@ import jmetal.operators.mutation.RouteSetDelMutation;
 import jmetal.operators.mutation.RouteSetCombinedGuidedMutation;
 import jmetal.operators.mutation.RouteSetTELMutation;
 import jmetal.operators.mutation.RouteSetTEOMutation;
-import jmetal.operators.mutation.RouteSetXchangelMutation;
-//import jmetal.operators.selection.SelectionFactory;
 
 /**
  *

@@ -23,7 +23,7 @@ public class TNDPExp2 extends Experiment
 
     private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0};
     private static final String[] selectionList = new String[]{"RandomSelection", "RetativeTournamentSelection"};
-    private static final String[] mutationList = new String[]{"RouteSetAddDelMutation", "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation"};
+    private static final String[] mutationList = new String[]{"RouteSetAddDelMutation", "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation","RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand"};
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -61,7 +61,7 @@ public class TNDPExp2 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp2 exp = new TNDPExp2();
-        exp.experimentName_ = "ExpM0All";
+        exp.experimentName_ = "ExpMandl4on7-4-16";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -82,11 +82,11 @@ public class TNDPExp2 extends Experiment
         
         exp.problemList_ = new String[] //Can be extended
         {
-            "M0-12"
+            "Mandl-4"
         };
 
         exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
-        exp.indicatorList_ = new String[0];
+        exp.indicatorList_ = new String[] {"HV"};
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
@@ -103,5 +103,6 @@ public class TNDPExp2 extends Experiment
         int numberOfThreads;
         exp.runExperiment(numberOfThreads = 1);
         exp.generateQualityIndicators();
+        exp.generateLatexTables() ;
     }
 }
