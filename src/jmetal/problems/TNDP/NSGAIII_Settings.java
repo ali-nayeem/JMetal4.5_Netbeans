@@ -37,6 +37,7 @@ public class NSGAIII_Settings extends Settings
     public double addProbability_;
     public int div1_;
     public int div2_;
+    public int tSize_;
 
     private HashMap<String, Operator> ListOfMutAndSel = new HashMap<>();
 
@@ -72,6 +73,7 @@ public class NSGAIII_Settings extends Settings
         addProbability_ = 0.5;
         div1_ = 3;
         div2_ = 2;
+        tSize_ = 40;
     } // NSGAII_Settings
 
     @Override
@@ -101,8 +103,17 @@ public class NSGAIII_Settings extends Settings
 //        parameters.put("addProbability", addProbability_);
 //        mutation = new RouteSetAddDelMutation(parameters);
         mutation = ListOfMutAndSel.get(mutationName_);
-
-        selection = ListOfMutAndSel.get(SelectionName_);
+        if (SelectionName_.equals("RetativeTournamentSelection"))
+        {
+            parameters = new HashMap();
+            parameters.put("tSize", tSize_);
+            selection = new RetativeTournamentSelection(parameters);
+        }
+        else
+        {
+             selection = ListOfMutAndSel.get(SelectionName_);
+        }
+        
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);
         algorithm.addOperator("mutation", mutation);
