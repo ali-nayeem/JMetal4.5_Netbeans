@@ -18,7 +18,6 @@ import jmetal.operators.mutation.RouteSetAddDelTEORand;
 import jmetal.operators.mutation.RouteSetCombinedGuidedMutation;
 import jmetal.operators.mutation.RouteSetCombinedRandomMutation;
 import jmetal.operators.selection.RandomSelection;
-import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
 
 /**

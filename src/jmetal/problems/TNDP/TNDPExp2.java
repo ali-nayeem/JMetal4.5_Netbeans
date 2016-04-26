@@ -21,25 +21,11 @@ import jmetal.util.JMException;
 public class TNDPExp2 extends Experiment
 {
 
-    private static final double[] crossoverProbabilityList =
-    {
-        0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0
-    };
-    private static final int[] tSizeList =
-    {
-        0, 10, 20, 40, 50, 60, 80, 100
-    };
-    private static final String[] selectionList = new String[]
-    {
-        "RandomSelection", "RetativeTournamentSelection"
-    };
-    private static final String[] mutationList = new String[]
-    {
-        "RouteSetAddDelMutation", "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation", "RouteSetAddDelRand", "RouteSetAddDelTELRand", "RouteSetAddDelTEORand"
-    };
-    private static String[] algoNameList = new String[crossoverProbabilityList.length * selectionList.length * mutationList.length * tSizeList.length];
-    private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length * selectionList.length * mutationList.length * tSizeList.length];
-
+    private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0};
+    private static final String[] selectionList = new String[]{"RandomSelection", "RetativeTournamentSelection"};
+    private static final String[] mutationList = new String[]{"RouteSetAddDelMutation", "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation","RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand"};
+    private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
+    private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
     public synchronized void algorithmSettings(String problemName, int problemId, Algorithm[] algorithm) throws ClassNotFoundException
     {
@@ -53,6 +39,7 @@ public class TNDPExp2 extends Experiment
 //            {
 //                parameters[i] = new HashMap();
 //            } // for
+
             if (!(paretoFrontFile_[problemIndex] == null) && !paretoFrontFile_[problemIndex].equals(""))
             {
                 for (int i = 0; i < numberOfAlgorithms; i++)
@@ -64,7 +51,7 @@ public class TNDPExp2 extends Experiment
             {
                 algorithm[i] = new NSGAIII_Settings(problemName).configure(parameterList[i]);
             }
-
+            
         } catch (IllegalArgumentException | IllegalAccessException | JMException ex)
         {
             Logger.getLogger(TNDPExp2.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,7 +61,7 @@ public class TNDPExp2 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp2 exp = new TNDPExp2();
-        exp.experimentName_ = "ExpMandl4on13-4-16";
+        exp.experimentName_ = "ExpMandl4on7-4-16";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -82,37 +69,29 @@ public class TNDPExp2 extends Experiment
             {
                 for (int k = 0; k < crossoverProbabilityList.length; k++)
                 {
-                    for (int l = 0; l < tSizeList.length; l++)
-                    {
-                        algoNameList[index] = mutationList[i] + "-" + selectionList[j] + "-" + crossoverProbabilityList[k]+"-"+ tSizeList[l];
-                        parameterList[index] = new HashMap();
-                        parameterList[index].put("mutationName_", mutationList[i]);
-                        parameterList[index].put("SelectionName_", selectionList[j]);
-                        parameterList[index].put("crossoverProbability_", crossoverProbabilityList[k]);
-                        parameterList[index].put("tSize_",tSizeList[l]);
-                        index++;
-                    }
-
+                    algoNameList[index] = mutationList[i] + "-" + selectionList[j] + "-" + crossoverProbabilityList[k];
+                    parameterList[index] = new HashMap();
+                    parameterList[index].put("mutationName_", mutationList[i]);
+                    parameterList[index].put("SelectionName_",selectionList[j]);
+                    parameterList[index].put("crossoverProbability_",crossoverProbabilityList[k]);
+                    index++;
                 }
             }
         }
         exp.algorithmNameList_ = algoNameList; //Can be extended
-
+        
         exp.problemList_ = new String[] //Can be extended
         {
             "Mandl-4"
         };
 
-        exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
-        exp.indicatorList_ = new String[]
-        {
-            "HV"
-        };
+        exp.paretoFrontFile_ = new String[]{"front.pf"}; //must be set as length of problemList_ 
+        exp.indicatorList_ = new String[] {"HV"};
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
         exp.experimentBaseDirectory_ = "IO/" + exp.experimentName_;
-        exp.paretoFrontDirectory_ = "";
+        exp.paretoFrontDirectory_ = "IO/ExtractFront";
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
@@ -122,8 +101,8 @@ public class TNDPExp2 extends Experiment
 
         // Run the experiments
         int numberOfThreads;
-        exp.runExperiment(numberOfThreads = 1);
+        //exp.runExperiment(numberOfThreads = 1);
         exp.generateQualityIndicators();
-        exp.generateLatexTables();
+        exp.generateLatexTables() ;
     }
 }
