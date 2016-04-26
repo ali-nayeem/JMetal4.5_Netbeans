@@ -9,7 +9,7 @@ import java.util.HashMap;
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
 import jmetal.experiments.Settings;
-import jmetal.metaheuristics.nsgaIII.NSGAIII;
+import jmetal.metaheuristics.thetadea.ThetaDEA;
 import jmetal.operators.crossover.RouteSetCrossover;
 import jmetal.operators.mutation.RouteSetAddDelRand;
 import jmetal.operators.mutation.RouteSetAddDelMutation;
@@ -73,7 +73,7 @@ public class ThetaDEA_Settings extends Settings
         div1_ = 3;
         div2_ = 2;
         tSize_ = 40;
-    } // NSGAII_Settings
+    } // ThetaDEA_Settings
 
     @Override
     public Algorithm configure() throws JMException
@@ -85,7 +85,7 @@ public class ThetaDEA_Settings extends Settings
 
         HashMap parameters; // Operator parameters
 
-        algorithm = new NSGAIII(problem_);
+        algorithm = new ThetaDEA(problem_);
         algorithm.setInputParameter("normalize", true);
         
         algorithm.setInputParameter("theta",5.0);
