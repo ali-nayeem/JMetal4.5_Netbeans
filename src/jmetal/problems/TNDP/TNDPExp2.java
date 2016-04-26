@@ -21,9 +21,9 @@ import jmetal.util.JMException;
 public class TNDPExp2 extends Experiment
 {
 
-    private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0};
-    private static final String[] selectionList = new String[]{"RandomSelection", "RetativeTournamentSelection"};
-    private static final String[] mutationList = new String[]{"RouteSetAddDelMutation", "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation","RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand"};
+    private static final double[] crossoverProbabilityList = {1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
+    private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
+    private static final String[] mutationList = new String[]{ "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation","RouteSetAddDelRand"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -49,7 +49,7 @@ public class TNDPExp2 extends Experiment
             } // if
             for (int i = 0; i < numberOfAlgorithms; i++)
             {
-                algorithm[i] = new NSGAIII_Settings(problemName).configure(parameterList[i]);
+                algorithm[i] = new ThetaDEA_Settings(problemName).configure(parameterList[i]);
             }
             
         } catch (IllegalArgumentException | IllegalAccessException | JMException ex)
@@ -61,7 +61,7 @@ public class TNDPExp2 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExp2 exp = new TNDPExp2();
-        exp.experimentName_ = "ExpMandl4on7-4-16";
+        exp.experimentName_ = "ExpThetaDEA26-4-16";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -85,13 +85,13 @@ public class TNDPExp2 extends Experiment
             "Mandl-4"
         };
 
-        exp.paretoFrontFile_ = new String[]{"front.pf"}; //must be set as length of problemList_ 
-        exp.indicatorList_ = new String[] {"HV"};
+        exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
+        exp.indicatorList_ = new String[0] ;
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
         exp.experimentBaseDirectory_ = "IO/" + exp.experimentName_;
-        exp.paretoFrontDirectory_ = "IO/ExtractFront";
+        exp.paretoFrontDirectory_ = "";
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
@@ -101,8 +101,8 @@ public class TNDPExp2 extends Experiment
 
         // Run the experiments
         int numberOfThreads;
-        //exp.runExperiment(numberOfThreads = 1);
+        exp.runExperiment(numberOfThreads = 1);
         exp.generateQualityIndicators();
-        exp.generateLatexTables() ;
+        //exp.generateLatexTables() ;
     }
 }
