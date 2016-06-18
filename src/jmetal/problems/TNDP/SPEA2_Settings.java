@@ -89,7 +89,7 @@ public class SPEA2_Settings extends Settings
 
         algorithm.setInputParameter("populationSize", populationSize_);
         algorithm.setInputParameter("archiveSize", archiveSize_);
-        algorithm.setInputParameter("maxEvaluations", maxGenerations_);
+        algorithm.setInputParameter("maxEvaluations", maxGenerations_*populationSize_+populationSize_);
 
         parameters = new HashMap();
         parameters.put("probability", crossoverProbability_);
