@@ -105,7 +105,11 @@ public class SPEA2 extends Algorithm{
         Solution [] offSpring = (Solution [])crossoverOperator.execute(parents);            
         mutationOperator.execute(offSpring[0]);            
         problem_.evaluate(offSpring[0]);
-        problem_.evaluateConstraints(offSpring[0]);            
+        problem_.evaluateConstraints(offSpring[0]);
+        if(offSpring[0].getOverallConstraintViolation() < 0) //MAN: avoid infeasible solution
+        {
+            continue;
+        }
         offSpringSolutionSet.add(offSpring[0]);
         evaluations++;
       } // while
