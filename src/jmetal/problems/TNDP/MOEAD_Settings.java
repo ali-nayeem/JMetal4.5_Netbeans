@@ -66,7 +66,7 @@ public class MOEAD_Settings extends Settings
         ListOfMutAndSel.put("RandomSelection", new RandomSelection(null));
         ListOfMutAndSel.put("RetativeTournamentSelection", new RetativeTournamentSelection(null));
         // Default experiments.settings
-        maxGenerations_ = 1;
+        maxGenerations_ = 500;
         mutationProbability_ = 1.0;
         crossoverProbability_ = 1.0;
         mutationName_ = "RouteSetAddDelRand";

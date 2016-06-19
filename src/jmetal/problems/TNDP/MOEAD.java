@@ -106,8 +106,8 @@ public class MOEAD extends Algorithm {
     /*the population size is the same with the number of weight vectors*/
     populationSize_ = vg.getVectors().length; 
     maxEvaluations = maxGenerations * populationSize_ + populationSize_;
-    dataDirectory_ = this.getInputParameter("dataDirectory").toString();
-    System.out.println("POPSIZE: "+ populationSize_) ;
+    //dataDirectory_ = this.getInputParameter("dataDirectory").toString();
+    //System.out.println("POPSIZE: "+ populationSize_) ;
 
     population_ = new SolutionSet(populationSize_);
     indArray_ = new Solution[problem_.getNumberOfObjectives()];
