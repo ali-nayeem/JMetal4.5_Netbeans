@@ -18,11 +18,11 @@ import jmetal.util.JMException;
  *
  * @author MAN
  */
-public class TNDPExpSPEA2 extends Experiment
+public class TNDPExpNSGAIII extends Experiment
 {
 
     private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
-    private static final String[] selectionList = new String[]{"BinaryTournament"}; //, "RetativeTournamentSelection"
+    private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
     private static final String[] mutationList = new String[]{ "RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
@@ -49,19 +49,19 @@ public class TNDPExpSPEA2 extends Experiment
             } // if
             for (int i = 0; i < numberOfAlgorithms; i++)
             {
-                algorithm[i] = new SPEA2_Settings(problemName).configure(parameterList[i]);
+                algorithm[i] = new NSGAIII_Settings(problemName).configure(parameterList[i]);
             }
             
         } catch (IllegalArgumentException | IllegalAccessException | JMException ex)
         {
-            Logger.getLogger(TNDPExpSPEA2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TNDPExpNSGAIII.class.getName()).log(Level.SEVERE, null, ex);
         }
     } // algorithmSettings
 
     public static void main(String[] args) throws JMException, IOException
     {
-        TNDPExpSPEA2 exp = new TNDPExpSPEA2();
-        exp.experimentName_ = "SPEA2_20-6-16";
+        TNDPExpNSGAIII exp = new TNDPExpNSGAIII();
+        exp.experimentName_ = "NSGAIII_20-6-16";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {

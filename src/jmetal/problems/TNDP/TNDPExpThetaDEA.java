@@ -21,9 +21,9 @@ import jmetal.util.JMException;
 public class TNDPExpThetaDEA extends Experiment
 {
 
-    private static final double[] crossoverProbabilityList = {1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
+    private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
     private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
-    private static final String[] mutationList = new String[]{ "RouteSetCombinedGuidedMutation", "RouteSetCombinedRandomMutation","RouteSetAddDelRand"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
+    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -61,7 +61,7 @@ public class TNDPExpThetaDEA extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExpThetaDEA exp = new TNDPExpThetaDEA();
-        exp.experimentName_ = "ExpThetaDEA26-4-16";
+        exp.experimentName_ = "ThetaDEA_20-6-16";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -90,7 +90,7 @@ public class TNDPExpThetaDEA extends Experiment
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
-        exp.experimentBaseDirectory_ = "IO/" + exp.experimentName_;
+        exp.experimentBaseDirectory_ = "Experiment/" + exp.experimentName_;
         exp.paretoFrontDirectory_ = "";
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
