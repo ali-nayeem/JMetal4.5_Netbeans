@@ -85,13 +85,13 @@ public class TNDPExpSPEA2 extends Experiment
             "Mandl-4"
         };
 
-        exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_ 
-        exp.indicatorList_ = new String[0] ;
+        exp.paretoFrontFile_ = new String[]{"front.pf"}; //must be set as length of problemList_ 
+        exp.indicatorList_ = new String[]{"HV"};
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
         exp.experimentBaseDirectory_ = "Experiment/" + exp.experimentName_;
-        exp.paretoFrontDirectory_ = "";
+        exp.paretoFrontDirectory_ = "Experiment/RF_20-6-16";
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
@@ -101,8 +101,8 @@ public class TNDPExpSPEA2 extends Experiment
 
         // Run the experiments
         int numberOfThreads;
-        exp.runExperiment(numberOfThreads = 1);
+        //exp.runExperiment(numberOfThreads = 1);
         exp.generateQualityIndicators();
-        //exp.generateLatexTables() ;
+        exp.generateLatexTables() ;
     }
 }
