@@ -23,7 +23,7 @@ public class TNDPExpMOEAD extends Experiment
 
     private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
     private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
-    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
+    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand"}; //,"RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -82,7 +82,7 @@ public class TNDPExpMOEAD extends Experiment
         
         exp.problemList_ = new String[] //Can be extended
         {
-            "Mandl-6"
+            "M1-15"
         };
 
         exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_    String[]{"front.pf"}
@@ -95,13 +95,13 @@ public class TNDPExpMOEAD extends Experiment
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
-        exp.independentRuns_ = 20;
+        exp.independentRuns_ = 15;
 
         exp.initExperiment();
 
         // Run the experiments
         int numberOfThreads;
-        exp.runExperiment(numberOfThreads = 1);
+        exp.runExperiment(numberOfThreads = Runtime.getRuntime().availableProcessors());
         exp.generateQualityIndicators();
         //exp.generateLatexTables() ;
     }
