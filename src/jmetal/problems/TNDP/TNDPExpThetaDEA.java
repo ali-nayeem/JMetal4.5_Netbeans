@@ -82,27 +82,27 @@ public class TNDPExpThetaDEA extends Experiment
         
         exp.problemList_ = new String[] //Can be extended
         {
-            "Mandl-6"
+            "M1-15"
         };
 
-        exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_   String[]{"front.pf"}
-        exp.indicatorList_ = new String[0] ; //String[]{"HV"}
+        exp.paretoFrontFile_ = new String[]{"M1-15.pf"}; //must be set as length of problemList_   String[]{"front.pf"}
+        exp.indicatorList_ = new String[]{"HV"}; //String[]{"HV"}
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
         exp.experimentBaseDirectory_ = "Experiment/" + exp.experimentName_;
-        exp.paretoFrontDirectory_ = ""; //Experiment/RF_20-6-16
+        exp.paretoFrontDirectory_ = "Experiment/RF_20-6-16"; //Experiment/RF_20-6-16
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
-        exp.independentRuns_ = 20;
+        exp.independentRuns_ = 15;
 
         exp.initExperiment();
 
         // Run the experiments
         int numberOfThreads;
-        exp.runExperiment(numberOfThreads = 1);
+        //exp.runExperiment(numberOfThreads = 1);
         exp.generateQualityIndicators();
-        //exp.generateLatexTables() ;
+        exp.generateLatexTables() ;
     }
 }

@@ -23,7 +23,7 @@ public class TNDPExpMOEAD extends Experiment
 
     private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
     private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
-    private static final String[] mutationList = new String[]{"RouteSetAddDelTEORand"}; //,,, "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
+    private static final String[] mutationList = new String[]{"RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //,,, "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -85,13 +85,13 @@ public class TNDPExpMOEAD extends Experiment
             "M1-15"
         };
 
-        exp.paretoFrontFile_ = new String[1]; //must be set as length of problemList_    String[]{"front.pf"}
-        exp.indicatorList_ = new String[0]; //String[]{"HV"}
+        exp.paretoFrontFile_ = new String[]{"M1-15.pf"}; //must be set as length of problemList_    String[]{"front.pf"}
+        exp.indicatorList_ = new String[]{"HV"}; //String[]{"HV"}
 
         int numberOfAlgorithms = exp.algorithmNameList_.length;
 
         exp.experimentBaseDirectory_ = "Experiment/" + exp.experimentName_;
-        exp.paretoFrontDirectory_ = "";  //Experiment/RF_20-6-16
+        exp.paretoFrontDirectory_ = "Experiment/RF_20-6-16";  //Experiment/RF_20-6-16
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
@@ -101,8 +101,8 @@ public class TNDPExpMOEAD extends Experiment
 
         // Run the experiments
         int numberOfThreads;
-        exp.runExperiment(numberOfThreads = Runtime.getRuntime().availableProcessors());
+        //exp.runExperiment(numberOfThreads = Runtime.getRuntime().availableProcessors());
         exp.generateQualityIndicators();
-        //exp.generateLatexTables() ;
+        exp.generateLatexTables() ;
     }
 }
