@@ -71,6 +71,16 @@ public class Route implements Comparable
         }
         return r;
     }
+    static Route createRouteFromCommaSeparatedString(String route)
+    {
+        Route r = new Route();
+        String[] nodes = route.split(",");
+        for (int i = 0; i < nodes.length ; i++)
+        {
+            r.nodeList.add(Integer.parseInt(nodes[i].trim()));
+        }
+        return r;
+    }
 
     public double calculateFleetSize()
     {

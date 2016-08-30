@@ -48,13 +48,25 @@ public class RouteSet extends Variable
             {
                 break;
             }
-            rs.routeSet.add(new Route().createRouteFromString(line));
+            rs.routeSet.add( Route.createRouteFromString(line));
         }
         br.close();
         fr.close();
         return rs;
     }
-
+    public static RouteSet readFromString(String srs) throws Exception
+    {
+        RouteSet rs = new RouteSet();
+        char[] trs = srs.trim().toCharArray();
+        trs[0] = trs[trs.length - 1] = ' ';
+        srs = new String(trs);
+        String[] r = srs.trim().split("\\]\\[");
+        for (int i = 0; i < r.length; i++)
+        {
+            rs.routeSet.add( Route.createRouteFromCommaSeparatedString(r[i]));
+        }
+        return rs;
+    }
     public int size()
     {
         return routeSet.size();
