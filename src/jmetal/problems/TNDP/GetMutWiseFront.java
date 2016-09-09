@@ -19,9 +19,9 @@ public class GetMutWiseFront
     /**
      * @param args the command line arguments
      */
-    static String algo = "SPEA2";
-    static String problemList_ = "Mandl-6";
-    static int independentRuns_ = 20;
+    static String algo = "ThetaDEA";
+    static String problemList_ = "M1-15";
+    static int independentRuns_ = 15;
     //*****************************************************************
     private static final double[] crossoverProbabilityList =
     {
