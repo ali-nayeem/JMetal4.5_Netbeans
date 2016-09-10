@@ -1,0 +1,5 @@
+RouteSetAddDelRand 0.603239
+RouteSetAddDelTELRand 0.604476
+RouteSetAddDelTEORand 0.604830
+RouteSetCombinedRandomMutation 0.601404
+RouteSetCombinedGuidedMutation 0.604084
