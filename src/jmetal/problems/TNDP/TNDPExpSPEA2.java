@@ -21,9 +21,9 @@ import jmetal.util.JMException;
 public class TNDPExpSPEA2 extends Experiment
 {
 
-    private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
+    private static final double[] crossoverProbabilityList = {0.0};//, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
     private static final String[] selectionList = new String[]{"BinaryTournament"}; //, "RetativeTournamentSelection"
-    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
+    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand"};//,"RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -61,7 +61,7 @@ public class TNDPExpSPEA2 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExpSPEA2 exp = new TNDPExpSPEA2();
-        exp.experimentName_ = "SPEA2_20-6-16";
+        exp.experimentName_ = "SPEA2_26-3-18";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {

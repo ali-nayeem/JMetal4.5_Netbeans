@@ -17,6 +17,7 @@ public class Path
     public ArrayList<Segment> segList = new ArrayList<>();
     int source, destination;
     double totalInVehicleTime = 0;
+    double totalInVehicleTimeCongested = 0;
     static double timeDiffThreshold = 0.1;
 
     public int getNumOfSegment()
@@ -34,6 +35,11 @@ public class Path
     public void setTotalInVehicleTime(double totalInVehicleTime)
     {
         this.totalInVehicleTime = totalInVehicleTime;
+    }
+    
+    public void setTotalInVehicleTimeCongested(double t)
+    {
+        this.totalInVehicleTimeCongested = t;
     }
 
     public Path(int source, int destination)
@@ -69,6 +75,7 @@ public class Path
         int routeId;
         int startNode;
         int endNode;
+        //double CongestedTravelTime;
 
         public Segment(int routeId, int startNode, int endNode)
         {
@@ -76,6 +83,11 @@ public class Path
             this.startNode = startNode;
             this.endNode = endNode;
         }
+
+//        void setCongestedTravelTime(double time)
+//        {
+//            CongestedTravelTime = time;
+//        }
 
     }
     double demandPerc;

@@ -36,14 +36,14 @@ public class TestNSGAIII
         Operator mutation; // Mutation operator
         Operator selection;
 
-        problem = new TNDP(4, new Mandl());
+        problem = new TNDP(60, new M3());
         algorithm = new NSGAIII(problem);
         algorithm.setInputParameter("normalize", true);
 
         algorithm.setInputParameter("div1", 3);
         algorithm.setInputParameter("div2", 2);
 
-        algorithm.setInputParameter("maxGenerations", 700);
+        algorithm.setInputParameter("maxGenerations", 10);
 
         crossover = new RouteSetCrossover(null);
         mutation = new RouteSetTEOMutation(null);

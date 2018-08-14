@@ -77,15 +77,14 @@ public class TNDP extends Problem
         HashMap[][] allPathClass = new HashMap[Vertices][Vertices];
         HashMap[][] allPathGroup = new HashMap[Vertices][Vertices];
         int[][] edgeUsage = new int[Vertices][Vertices];
+        double[][] edgeFreqSum = new double[Vertices][Vertices];
 
         double totalRL = 0;
         for (int k = 0; k < rs.size(); k++)
         {
             routeDemand[k] = new double[rs.getRoute(k).size()];
-            totalRL += rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage);
         }
-        solution.setObjective(OBJECTIVES.RL, totalRL);
-        solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));
+        
         for (int i = 0; i < Vertices; i++)
         {
             for (int j = i + 1; j < Vertices; j++)
@@ -132,6 +131,31 @@ public class TNDP extends Problem
                 }
             }
         } while (!findMLS(rs, routeDemand));
+        
+        for (int k = 0; k < rs.size(); k++)
+        {
+            totalRL += rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage, edgeFreqSum);
+        }
+        
+        for (int i = 0; i < edgeFreqSum.length; i++)
+        {
+            for (int j = i + 1; j < edgeFreqSum.length; j++)
+            {
+                if (time[i][j] != Integer.MAX_VALUE)
+                {
+                    edgeFreqSum[i][j] = (edgeFreqSum[j][i] *= time[i][j]);
+                }
+            }
+
+        }
+        
+        for (int k = 0; k < rs.size(); k++)
+        {
+            rs.getRoute(k).calculateCongestionFactor(edgeFreqSum);
+        }
+        solution.setObjective(OBJECTIVES.RL, totalRL);
+        solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
+        
         rs.d[0] = rs.d[0] / totalDemand; //direct
         rs.d[1] = rs.d[1] / totalDemand; // 1-transfer
         rs.d[2] = rs.d[2] / totalDemand; // unsatisfied
@@ -143,7 +167,7 @@ public class TNDP extends Problem
             totalFS += rs.getRoute(k).calculateFleetSize();
         }
         solution.setObjective(OBJECTIVES.FS, totalFS);
-        solution.setObjective(OBJECTIVES.IVTT, calculateObjectiveIVTT(allPath));
+        solution.setObjective(OBJECTIVES.IVTT, calculateObjectiveIVTT(allPath, rs));
         solution.setObjective(OBJECTIVES.WT, calculateObjectiveWT(allPath, rs));
     }
 
@@ -167,7 +191,7 @@ public class TNDP extends Problem
         }
 
         Set<Integer> commonRoutes = intersect(routesHavingS, routesHavingD);
-        if (commonRoutes.size() > 0)
+        if (commonRoutes.size() > 0) //direct path using one route
         {
             for (int i : commonRoutes)
             {
@@ -241,7 +265,7 @@ public class TNDP extends Problem
         for (Path p : paths)
         {
             double totalTime = 0;
-
+            
             for (Path.Segment seg : p.segList)
             {
                 Route r = rs.getRoute(seg.routeId);
@@ -273,6 +297,33 @@ public class TNDP extends Problem
             {
                 paths.remove(i);
             }
+        }
+    }
+    
+    private void calculateCongestedTravelTime(ArrayList<Path> paths, RouteSet rs)
+    {
+        for (Path p : paths)
+        {
+            double pathCongestedTravelTime = 0; 
+            for (Path.Segment seg : p.segList)
+            {
+                double segTotalTime = 0;
+                Route r = rs.getRoute(seg.routeId);
+                int si = r.nodeList.indexOf(seg.startNode);
+                int ei = r.nodeList.indexOf(seg.endNode);
+                if (si > ei)
+                {
+                    int t = si;
+                    si = ei;
+                    ei = t;
+                }
+                for (si++; si <= ei; si++)
+                {
+                    segTotalTime += time[r.nodeList.get(si)][r.nodeList.get(si - 1)];
+                }
+                pathCongestedTravelTime =+ segTotalTime*r.getCongestionFactor();
+            }
+            p.setTotalInVehicleTimeCongested(pathCongestedTravelTime);
         }
     }
 
@@ -406,6 +457,41 @@ public class TNDP extends Problem
         }
         return total;
     }
+    
+    private double calculateObjectiveIVTT(ArrayList<Path>[][] allPath, RouteSet rs) //ITS Revision: Consider congestion
+    {
+        double total = 0;
+        int vertices = ins.getNumOfVertices();
+        for (int i = 0; i < vertices; i++)
+        {
+            for (int j = i + 1; j < vertices; j++)
+            {
+                if (allPath[i][j] != null)
+                {
+                    if (allPath[i][j].get(0).getNumOfSegment() == 1) //direct path with no transfer, uses only one route
+                    {
+                        for (Path p : allPath[i][j])
+                        {   
+                            Route r = rs.getRoute(p.getRouteOfSeg(0));
+                            total += p.demandPerc * demand[i][j] * p.totalInVehicleTime * r.getCongestionFactor(); //ITS Revision: Consider congestion
+                        }                         
+                    }
+                    else
+                    {
+                        calculateCongestedTravelTime(allPath[i][j], rs); 
+                        for (Path p : allPath[i][j])
+                        {                       
+                            total += p.demandPerc * demand[i][j] * p.totalInVehicleTimeCongested; //ITS Revision: Consider congestion
+                        }                        
+                    }
+
+
+                }
+
+            }
+        }
+        return total;
+    }
 
     private double calculateObjectiveWT(ArrayList[][] allPath, RouteSet rs)
     {
@@ -423,7 +509,7 @@ public class TNDP extends Problem
                         for (int k = 0; k < p.segList.size(); k++)
                         {
                             Route r = rs.getRoute(p.getRouteOfSeg(k));
-                            pathWT += r.calculateWaitingTime();
+                            pathWT += r.calculateWaitingTime() * r.getCongestionFactor(); //ITS Revision: Consider congestion
                         }
                         totalWT += p.demandPerc * demand[i][j] * pathWT;
                     }

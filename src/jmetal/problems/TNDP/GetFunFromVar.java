@@ -26,8 +26,8 @@ public class GetFunFromVar
     /**
      * @param args the command line arguments
      */
-    static String varFile = "VAR_M115.txt";  
-    static Instance ins = new M1();
+    static String varFile = "VAR.txt";  
+    static Instance ins = new Mandl();
     public static void main(String[] args) throws Exception
     {
         // TODO code application logic here

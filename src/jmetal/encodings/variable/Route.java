@@ -25,10 +25,11 @@ public class Route implements Comparable
     static double stationStandTime = 0;
     static int minFreq = 1;
     static int busCap = 50;
-    static double diffThreshold = 0.01;
+    static double diffThreshold = 0.1;
     boolean converged = false;
     private double waitingTime;
     private double length = -1;
+    private double congestionFactor = -1;
 
     int revCount = 0;
     boolean addAtEnd = true;
@@ -71,11 +72,12 @@ public class Route implements Comparable
         }
         return r;
     }
+
     static Route createRouteFromCommaSeparatedString(String route)
     {
         Route r = new Route();
         String[] nodes = route.split(",");
-        for (int i = 0; i < nodes.length ; i++)
+        for (int i = 0; i < nodes.length; i++)
         {
             r.nodeList.add(Integer.parseInt(nodes[i].trim()));
         }
@@ -104,6 +106,42 @@ public class Route implements Comparable
         roundTripTime += (nodeList.size() - 1) * stationStandTime;
         roundTripTime = 2 * roundTripTime;
         return length;
+    }
+
+    public double calculateRouteLength_RoundTrip_edgeOverlap(int[][] time, int[][] edgeUsage, double[][] edgeFreqSum)
+    {
+        roundTripTime = 0;
+        for (int i = 1; i < nodeList.size(); i++)
+        {
+            roundTripTime += time[nodeList.get(i)][nodeList.get(i - 1)];
+            edgeUsage[nodeList.get(i)][nodeList.get(i - 1)] = ++edgeUsage[nodeList.get(i - 1)][nodeList.get(i)];
+            edgeFreqSum[nodeList.get(i)][nodeList.get(i - 1)] = (edgeFreqSum[nodeList.get(i - 1)][nodeList.get(i)] += this.frequency);
+        }
+
+        length = roundTripTime;
+        roundTripTime += (nodeList.size() - 1) * stationStandTime;
+        roundTripTime = 2 * roundTripTime;
+        return length;
+    }
+    
+    public void calculateCongestionFactor(double[][] edgeFreqSum)
+    {
+        double weightedAvg = 0;
+        for (int i = 1; i < nodeList.size(); i++)
+        {
+           weightedAvg +=  edgeFreqSum[nodeList.get(i)][nodeList.get(i - 1)];
+        }
+        weightedAvg = weightedAvg / length;
+        congestionFactor = weightedAvg / frequency;
+    }
+    
+    public double getCongestionFactor()
+    {
+       if (congestionFactor == -1)
+        {
+            throw new Error("Attempt to get route length before calculaution");
+        }
+        return congestionFactor; 
     }
 
     public double getLength()
