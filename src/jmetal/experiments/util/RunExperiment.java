@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jmetal.util.Configuration;
 /**
  * Class implementing the steps to run an experiment
  */
@@ -157,7 +158,11 @@ public class RunExperiment extends Thread {
 						", run: " + runs);
 				try {
 					try {
+                                                long initTime = System.currentTimeMillis();
 						resultFront= algorithm[alg].execute();
+                                                long estimatedTime = System.currentTimeMillis() - initTime;
+                                                Configuration.logger_.info( algorithmNameList_[alg] +
+						", run: " + runs + ", time: " +  (double) estimatedTime/(1000*60*60));
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
