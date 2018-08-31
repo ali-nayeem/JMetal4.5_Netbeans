@@ -65,7 +65,7 @@ public class TNDPExpThetaDEA_M3 extends Experiment
     public static void main(String[] args) throws JMException, IOException
     {
         TNDPExpThetaDEA_M3 exp = new TNDPExpThetaDEA_M3();
-        exp.experimentName_ = "ThetaDEA_M3_15_8_18";
+        exp.experimentName_ = "ThetaDEA_M3_31_8_18";
         int index = 0;
         for (int i = 0; i < mutationList.length; i++)
         {
@@ -104,7 +104,7 @@ public class TNDPExpThetaDEA_M3 extends Experiment
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
-        exp.independentRuns_ = 10;
+        exp.independentRuns_ = 4;
 
         exp.initExperiment();
         FileHandler fileHandler = new FileHandler(exp.experimentBaseDirectory_+"/M3.log");

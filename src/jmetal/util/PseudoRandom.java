@@ -30,7 +30,7 @@ public class PseudoRandom
      * generator used to obtain the random values
      */
     private static IRandomGenerator random_ = null;
-    private static IRandomGenerator defaultGenerator_ = new MersenneTwisterFast(123456789); //MAN
+    private static IRandomGenerator defaultGenerator_ = new MersenneTwisterFast(987654321); //MAN
 
     /**
      * Constructor. Creates a new instance of PseudoRandom.
