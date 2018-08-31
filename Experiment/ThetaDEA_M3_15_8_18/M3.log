@@ -1,0 +1,72 @@
+Aug 17, 2018 9:12:25 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 1, time: 48.92695388888889
+Aug 17, 2018 11:44:13 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 0, time: 51.4571525
+Aug 18, 2018 8:54:09 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 1, time: 60.62251222222222
+Aug 18, 2018 9:23:00 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 0, time: 61.10353305555556
+Aug 18, 2018 9:14:44 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 1, time: 72.9654963888889
+Aug 18, 2018 10:08:02 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 0, time: 73.85372472222222
+Aug 19, 2018 6:14:32 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 1, time: 81.96219222222223
+Aug 19, 2018 8:14:33 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 0, time: 83.962525
+Aug 19, 2018 4:00:44 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 0, time: 91.73224861111112
+Aug 19, 2018 4:18:30 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 1, time: 92.02804305555556
+Aug 19, 2018 11:44:13 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 2, time: 50.529919444444445
+Aug 20, 2018 2:04:59 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 2, time: 62.34610305555555
+Aug 21, 2018 12:18:55 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 3, time: 50.181286388888886
+Aug 21, 2018 7:47:43 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 2, time: 70.89266555555555
+Aug 21, 2018 5:44:16 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 3, time: 59.49547222222222
+Aug 21, 2018 7:53:06 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 2, time: 82.50149444444445
+Aug 22, 2018 12:50:40 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 4, time: 49.107439166666666
+Aug 22, 2018 6:08:42 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 3, time: 69.90241361111111
+Aug 22, 2018 1:48:31 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 2, time: 88.56285555555556
+Aug 22, 2018 8:50:09 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 3, time: 76.82356416666667
+Aug 23, 2018 12:41:24 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 4, time: 58.606921944444444
+Aug 23, 2018 9:35:04 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 3, time: 89.27626694444444
+Aug 23, 2018 8:51:15 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 4, time: 68.5389275
+Aug 23, 2018 11:54:10 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 5, time: 52.01789083333333
+Aug 24, 2018 10:46:22 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 5, time: 57.92842638888889
+Aug 24, 2018 3:49:42 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 4, time: 80.032935
+Aug 25, 2018 1:36:33 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 6, time: 48.9191775
+Aug 25, 2018 3:39:40 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 5, time: 69.51629361111111
+Aug 25, 2018 9:51:27 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 4, time: 88.11968027777777
+Aug 25, 2018 7:50:11 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 6, time: 58.25176111111111
+Aug 25, 2018 8:22:15 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 5, time: 78.56226944444444
+Aug 26, 2018 7:40:59 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.9, run: 5, time: 82.84737333333334
+Aug 26, 2018 1:23:25 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.5, run: 6, time: 64.53594222222222
+Aug 26, 2018 1:41:59 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.1, run: 7, time: 45.87139222222222
+Aug 26, 2018 9:41:06 PM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.7, run: 6, time: 69.78207027777778
+Aug 27, 2018 5:44:26 AM jmetal.experiments.util.RunExperiment run
+INFO: addProb-0.3, run: 7, time: 52.13091138888889
