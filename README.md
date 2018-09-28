@@ -32,14 +32,14 @@ We implemented five mutation schemes inside `src/jmetal/operators/mutation/` lis
 
 ### Evolutionary algorithms
 We adapted four evolutionary algorithms to solve TNDP as follows:
-* jmetal/metaheuristics/spea2/SPEA2.java
-* jmetal/problems/TNDP/MOEAD.java
-* jmetal/metaheuristics/nsgaIII/NSGAIII.java
-* jmetal/metaheuristics/thetadea/ThetaDEA.java
+* src/jmetal/metaheuristics/spea2/SPEA2.java
+* src/jmetal/problems/TNDP/MOEAD.java
+* src/jmetal/metaheuristics/nsgaIII/NSGAIII.java
+* src/jmetal/metaheuristics/thetadea/ThetaDEA.java
 
 
 ### Experiement
-We experiement with four algorithms varying differetn parameters we implemented four classes inside `jmetal/problems/TNDP/` as follows:
+We experiement with four algorithms varying differetn parameters we implemented four classes inside `src/jmetal/problems/TNDP/` as follows:
 * TNDPExpSPEA2.java
 * TNDPExpMOEAD.java
 * TNDPExpNSGAIII.java
@@ -78,7 +78,7 @@ ant jar
 ```
 
 ## Running code
-To execute a class named `jmetal/problems/TNDP/TNDPExpThetaDEA.java`, just run this command:
+To execute a class named `src/jmetal/problems/TNDP/TNDPExpThetaDEA.java`, just run this command:
 
 ```
 java -cp Jama-1.0.2.jar:grph-1.6.29-big.jar:dist/JMetal4.5.jar jmetal.problems.TNDP.TNDPExpThetaDEA
