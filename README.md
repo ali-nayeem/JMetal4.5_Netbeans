@@ -1,8 +1,49 @@
 # Solving Transit Network Design Problem Using Many-Objective Evolutionary Approach
-This is a JAVA Netbeans project based on JMetal 4.5 (http://jmetal.sourceforge.net/) aimed at solving transit network design problem (TNDP) by using many-objective evolutionary algorithms (MaOEAs). In addition, here we keep the datasets and statistical results used for our research works.
+This is a JAVA Netbeans project based on JMetal 4.5 (http://jmetal.sourceforge.net/) where we added necessary codes to solve transit network design problem (TNDP) by applying many-objective evolutionary algorithms (MaOEAs). In addition, here we keep the datasets and statistical results used for our research works. Below we describe different components of this repository.
 
 ## Source code
+All the codes are organized within the directiry `src/jmetal/`. Here we describe the codes that we added for solving TNDP.
 
+### Solution enconding
+We encoded a transit network using the following classes kept within `src/jmetal/encodings/variable/`:
+* Route.java 
+* RouteSet.java 
+
+### Random initialization
+We implemented this as a method named `generateRouteSet()` inside the class `RouteSet`.
+
+### Crossover Operator
+We implemented this using `src/jmetal/operators/crossover/RouteSetCrossover.java`.
+
+### Mutation Operators
+We implemented four mutation operators inside `src/jmetal/operators/mutation/` listed below:
+* RouteSetAddlMutation.java  (AddNodes)
+* RouteSetDelMutation.java  (DeleteNodes)
+* RouteSetTELMutation.java  (ShortenRoutes)
+* RouteSetTEOMutation.java  (ReduceOverlap)
+
+### Mutation Schemes
+We implemented five mutation schemes inside `src/jmetal/operators/mutation/` listed below:
+* RouteSetAddDelRand.java  (Basic Scheme)
+* RouteSetAddDelTELRand.java  (Random Scheme I)
+* RouteSetAddDelTEORand.java  (Random Scheme I)
+* RouteSetCombinedRandomMutation.java  (Random Scheme I)
+* RouteSetCombinedGuidedMutation.java  (Guided Scheme)
+
+### Evolutionary algorithms
+We adapted four evolutionary algorithms to solve TNDP as follows:
+* jmetal/metaheuristics/spea2/SPEA2.java
+* jmetal/problems/TNDP/MOEAD.java
+* jmetal/metaheuristics/nsgaIII/NSGAIII.java
+* jmetal/metaheuristics/thetadea/ThetaDEA.java
+
+
+### Experiement
+We experiement with four algorithms varying differetn parameters we implemented four classes inside `jmetal/problems/TNDP/` as follows:
+* TNDPExpSPEA2.java
+* TNDPExpMOEAD.java
+* TNDPExpNSGAIII.java
+* TNDPExpThetaDEA.java
 
 ## Datasets
 We keep the datasets in the directory `IO`. There are currently four datasets listed below:
@@ -38,6 +79,6 @@ ant jar
 ## Running code
 To execute a class named `TNDPExpThetaDEA`, just run this command:
 
-````
+```
 java -cp Jama-1.0.2.jar:grph-1.6.29-big.jar:dist/JMetal4.5.jar jmetal.problems.TNDP.TNDPExpThetaDEA
 ```
