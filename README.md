@@ -73,7 +73,7 @@ git clone https://github.com/ali-nayeem/JMetal4.5_Netbeans.git
 ```
 Once cloned, you can compile the software and generate a jar file with the following commands:
 ```
-ant
+ant compile
 ant jar
 ```
 
