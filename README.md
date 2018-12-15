@@ -1,5 +1,6 @@
 # Solving Transit Network Design Problem Using Many-Objective Evolutionary Approach
-This is a JAVA Netbeans project based on JMetal 4.5 (http://jmetal.sourceforge.net/) where we added necessary codes to solve transit network design problem (TNDP) by applying many-objective evolutionary algorithms (MaOEAs). In addition, here we keep the datasets and statistical results used for our research works. Below we describe different components of this repository.
+This is a JAVA Netbeans project based on JMetal 4.5 (http://jmetal.sourceforge.net/) where we added necessary codes to solve transit network design problem (TNDP) by applying many-objective evolutionary algorithms (MaOEAs). In addition, here we keep the datasets and statistical results used for our research works. Below we describe different components of this repository. This work was published in the journal [IEEE Transactions on Intelligent Transportation Systems](https://ieeexplore.ieee.org/document/8577033).
+
 
 ## Source code
 All the codes are organized within the directiry `src/jmetal/`. Here we describe the codes that we added for solving TNDP.
