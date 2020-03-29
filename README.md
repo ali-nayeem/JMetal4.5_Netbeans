@@ -1,3 +1,4 @@
+This repository is forked from [Nayeem Sir](https://github.com/ali-nayeem) 
 # Solving Transit Network Design Problem Using Many-Objective Evolutionary Approach
 This is a JAVA Netbeans project based on JMetal 4.5 (http://jmetal.sourceforge.net/) where we added necessary codes to solve transit network design problem (TNDP) by applying many-objective evolutionary algorithms (MaOEAs). In addition, here we keep the datasets and statistical results used for our research works. Below we describe different components of this repository. This work was published in the journal [IEEE Transactions on Intelligent Transportation Systems](https://ieeexplore.ieee.org/document/8577033).
 
@@ -70,7 +71,7 @@ To use our framework the following software packages are required:
 ## Downloading and compiling
 To download our framework just clone the Git repository hosted in GitHub:
 ```
-git clone https://github.com/ali-nayeem/JMetal4.5_Netbeans.git
+git clone https://github.com/mahi045/JMetal4.5_Netbeans.git
 ```
 Once cloned, you can compile the software and generate a jar file with the following commands:
 ```
