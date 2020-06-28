@@ -39,7 +39,7 @@ public abstract class Instance
 
     public String getDemandFile()
     {
-        return dir + demandFile;
+        return dir + "M1ZoneDemand.txt";
     }
 
     public String getTimeFile()
@@ -55,6 +55,11 @@ public abstract class Instance
     public String getEdgeListFile()
     {
         return dir + EdgeListFile;
+    }
+
+    public String getZoneListFile()
+    {
+        return dir + "M1Zone.txt";
     }
 
     public int getMinNode()

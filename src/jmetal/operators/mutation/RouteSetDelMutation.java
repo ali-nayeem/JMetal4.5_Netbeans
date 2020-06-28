@@ -128,17 +128,18 @@ public class RouteSetDelMutation extends Mutation
                 continue;
             }
 
-            for (int j = 1; j > -1; j--)
+            for (int j = 0; j > -1; j--)
             {
                 while (r.size() > minNode)
                 {
                     int termIndex = j * (r.size() - 1);
                     int terminalNode = r.nodeList.get(termIndex);
-                    if (nodeDistib[terminalNode].size() < 2)
-                    {
-                        break;
-                    }
-                    if (canBeDeleted(rIndex[i], rAdjMat, reducedGraph, nodeDistib[terminalNode]))
+                    // if (nodeDistib[terminalNode].size() < 2)
+                    // {
+                    //     break;
+                    // }
+                    // if (canBeDeleted(rIndex[i], rAdjMat, reducedGraph, nodeDistib[terminalNode]))
+                    if (prob.nodeCanBeDeleted(rs, terminalNode))
                     {
                         r.nodeList.remove(termIndex);
                         I--;
@@ -154,6 +155,7 @@ public class RouteSetDelMutation extends Mutation
                 }
             }
         }
+        prob.route_destination_check(rs.routeSet, "Del Function");
     }
 
     private boolean canBeDeleted(int rId, int[][] rAdjMat, Grph reducedGraph, Set<Integer> routes)

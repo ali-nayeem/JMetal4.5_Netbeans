@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import jmetal.core.Variable;
@@ -19,7 +20,7 @@ import jmetal.problems.TNDP.TNDP;
 import jmetal.util.PseudoRandom;
 import toools.set.IntHashSet;
 import toools.set.IntSet;
-
+import com.google.common.collect.Sets;
 /**
  *
  * @author MAN
@@ -34,6 +35,7 @@ public class RouteSet extends Variable
     };// d0,d1,dun => direct , 1-transfer , unsatisfied 
     static double epsilon = 0.1;
     private int overallConstraintViolation = 0;
+    HashMap<Integer, ArrayList<Integer>> zoneNeedAttention = new HashMap<Integer, ArrayList<Integer>>();
    // double totalIVTT;
 
     public static RouteSet readFromFile(String fileName) throws Exception
@@ -113,43 +115,69 @@ public class RouteSet extends Variable
             {
                 int routeLength = PseudoRandom.nextInt(maxNode - minNode + 1) + minNode;
                 int firstNode;
-                if (count == 0)
-                {
-                    firstNode = PseudoRandom.nextInt(numOfVertices);
+                while(prob.isShelter(firstNode = PseudoRandom.nextInt(numOfVertices)));
+                
+                // if (count == 0)
+                // {
+                //     firstNode = PseudoRandom.nextInt(numOfVertices);
 
-                } else
-                {
-                    Object chosenNodes[] = chosen.toArray();
-                    firstNode = (int) chosenNodes[PseudoRandom.nextInt(chosenNodes.length)];
-                }
+                // } else
+                // {
+                //     Object chosenNodes[] = chosen.toArray();
+                //     firstNode = (int) chosenNodes[PseudoRandom.nextInt(chosenNodes.length)];
+                // }
                 Route r;
                 Set<Integer> chosenLocal;
                 double chosenCountLocal[];
                 do
                 {
+                    // determine shelter and primary route
+                    int [] primary_route = prob.determineRoute(firstNode);
+                    if (!prob.isShelter(primary_route[primary_route.length - 1]))
+                    {
+                        throw new Error("No shelter in the path");
+                    }
                     chosenLocal = (Set<Integer>) ((HashSet<Integer>) chosen).clone();
                     chosenCountLocal = chosenCount.clone();
                     r = new Route();
-                    r.addNode(firstNode);
-                    chosenLocal.add(firstNode);
-                    chosenCountLocal[firstNode]++;
+                    r.addShelter(primary_route[primary_route.length - 1]);
+                    for (int i = 0; i < primary_route.length; i++) {
+                        r.nodeList.add(primary_route[i]);
+                        chosenLocal.add(primary_route[i]);
+                        chosenCountLocal[primary_route[i]]++;
+                    }
 
                     int curNode = firstNode;
-                    while (r.size() < routeLength && r.revCount < 2)
+                    while (r.size() < routeLength && r.revCount < 1)
                     {
                         ArrayList<Integer> unused = prob.g.getNeighbours(curNode).toIntegerArrayList();
                         unused.removeAll(r.nodeList);
                         if (!unused.isEmpty())
                         {
-                            double fit[] = new double[unused.size()];
+                            // double fit[] = new double[unused.size()];
+                            // double total = 0;
+                            // for (int k = 0; k < unused.size(); k++)
+                            // {
+                            //     fit[k] = 1.0 / chosenCountLocal[unused.get(k)];
+                            //     total += fit[k];
+                            // }
                             double total = 0;
+
+                            double fit[] = prob.setFitness(unused, chosenLocal);
                             for (int k = 0; k < unused.size(); k++)
                             {
-                                fit[k] = 1.0 / chosenCountLocal[unused.get(k)];
                                 total += fit[k];
                             }
-                            curNode = unused.get(PseudoRandom.roulette_wheel(fit, total));
-                            r.addNode(curNode);
+                            if (total == 0) {
+                                curNode = unused.get(PseudoRandom.nextInt(fit.length));
+                            }
+                            else {
+                                curNode = unused.get(PseudoRandom.roulette_wheel(fit, total));    
+                            }
+                            if (prob.isShelter(curNode)) {
+                                r.addShelter(curNode);                                    
+                            }
+                            r.nodeList.add(0, curNode);
                             chosenLocal.add(curNode);
                             chosenCountLocal[curNode]++;
                         } else
@@ -158,12 +186,16 @@ public class RouteSet extends Variable
                             curNode = r.nodeList.get(0);
                         }
                     }
-                } while (r.size() != routeLength);
+                } while (r.size() <= routeLength / 2 || r.size() < minNode);
                 routeSet.add(r);
                 chosen = chosenLocal;
                 chosenCount = chosenCountLocal;
+                // System.out.println(routeSet);
+                prob.route_destination_check(routeSet, "Before Repair call");
+                
             }
-            if (chosen.size() < numOfVertices)
+            
+            if (!prob.isAllZoneCovered(chosen, zoneNeedAttention, routeSet))
             {
                 feasible = repair(chosen, prob);
             } else
@@ -172,21 +204,16 @@ public class RouteSet extends Variable
             }
 
         } while (!feasible);
-
+        prob.route_destination_check(routeSet, "Generate Route Set");
     }
 
     public boolean repair(Set<Integer> chosen, TNDP prob)
     {
+        Set<Integer> set1, set2, set3;
         int numOfVertices = prob.ins.getNumOfVertices();
         int maxNode = prob.ins.getMaxNode();
         ArrayList<Integer> absent = new ArrayList<>();
-        for (int i = 0; i < numOfVertices; i++)
-        {
-            if (!chosen.contains(i))
-            {
-                absent.add(i);
-            }
-        }
+        absent = prob.uncoveredNodes(chosen);
         int[] rIndex = new int[size()];
         for (int i = 0; i < routeSet.size(); i++)
         {
@@ -194,6 +221,7 @@ public class RouteSet extends Variable
         }
         //Collections.shuffle(rIndex, TripAsssignmentTest.rnd);
         PseudoRandom.shuffleArray(rIndex);
+        int tobeAdded;
         for (int i = 0; i < rIndex.length; i++)
         {
             Route r = routeSet.get(rIndex[i]);
@@ -204,32 +232,70 @@ public class RouteSet extends Variable
             // int end = r.nodeList.get(r.nodeList.size());
             //ArrayList<Integer> eAdjList = TripAsssignmentTest.g.getNeighbours(end).toIntegerArrayList();
 
-            for (int j = 0; j < 2; j++)
-            {
+            // for (int j = 0; j < 2; j++)
+            // {
                 while (r.size() < maxNode)
                 {
-                    int terminalNode = r.nodeList.get(j * (r.size() - 1));
+                    int terminalNode = r.nodeList.get(0 * (r.size() - 1));
                     ArrayList<Integer> tAdjList = prob.g.getNeighbours(terminalNode).toIntegerArrayList();
                     tAdjList.retainAll(absent);
+                    set1 = new HashSet<Integer>(tAdjList);
+                    set2 = new HashSet<Integer>(chosen);
+                    if (!Collections.disjoint(set1, set2))
+                    {
+                        tAdjList.retainAll(absent);
+                    }
+                    else {
+                        set3 = new HashSet<Integer>();
+                        for (Integer s: r.shelterList) {
+                            for (Integer z: zoneNeedAttention.get(s)) {
+                                set1 = new HashSet<Integer>(tAdjList);
+                                set2 = new HashSet<Integer>(prob.getAllStops(z));
+                                if (!Collections.disjoint(set1, set2))
+                                {
+                                    set3 = Sets.union(set3, set2);
+                                }
+                                if (set3.size() > 0)
+                                {
+                                    break;
+                                }
+                            }
+                            if (set3.size() > 0)
+                            {
+                                break;
+                            }
+                        }
+                        tAdjList.retainAll(new ArrayList<Integer>(set3));
+                    }
                     if (tAdjList.isEmpty())
                     {
                         break;
                     }
-                    if (j == 0)
-                    {
-                        r.nodeList.add(0, tAdjList.get(0));
-                    } else
-                    {
-                        r.nodeList.add(tAdjList.get(0));
-                    }
+                    // if (j == 0)                        
+                    // {
+                        double total = 0;
+                        double fit[] = prob.setFitness(tAdjList, chosen);
+                        for (int k = 0; k < tAdjList.size(); k++)
+                        {
+                            total += fit[k];
+                        }
+                        tobeAdded = tAdjList.get(PseudoRandom.roulette_wheel(fit, total));
+                        r.nodeList.add(0, tobeAdded);
+                        for (Integer s: r.shelterList) {
+                            zoneNeedAttention.get(s).remove(new Integer(prob.getZone(tobeAdded)));
+                        }
+                    // } else
+                    // {
+                    //     r.nodeList.add(tAdjList.get(0));
+                    // }
 
-                    absent.remove(tAdjList.get(0));
-                    if (absent.isEmpty())
+                    absent.remove(new Integer(tobeAdded));
+                    if (prob.isAllZoneCovered(chosen, zoneNeedAttention, routeSet))
                     {
                         return true;
                     }
                 }
-            }
+            // }
         }
         overallConstraintViolation = -1*absent.size();
         return false;
@@ -240,7 +306,7 @@ public class RouteSet extends Variable
     {
         for (Route r : routeSet)
         {
-            if (r.size() < prob.ins.getMinNode() || r.size() > prob.ins.getMaxNode())
+            if (r.size() < prob.ins.getMinNode() /*|| r.size() > prob.ins.getMaxNode()*/)
             {
                 throw new Error("Route break length constraint");
             }

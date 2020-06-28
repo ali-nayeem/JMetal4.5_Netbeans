@@ -16,6 +16,7 @@ public class Route implements Comparable
 {
 
     public ArrayList<Integer> nodeList = new ArrayList<>();
+    public ArrayList<Integer> shelterList = new ArrayList<>();
     //int id;
     public double frequency = 1;
     double revFreq = -1;
@@ -42,14 +43,22 @@ public class Route implements Comparable
 
     void addNode(int n)
     {
-        if (addAtEnd)
-        {
-            nodeList.add(n);
-        } else
-        {
+        // if (addAtEnd)
+        // {
+        //     nodeList.add(n);
+        // } else
+        // {
             nodeList.add(0, n);
-        }
+        // }
 
+    }
+
+    void addShelter(int n) {
+        shelterList.add(n);
+    }
+
+    ArrayList<Integer> getShelter() {
+        return shelterList;
     }
 
     public boolean reviseFrequency(double MLSDemand, int MLS)
@@ -167,6 +176,12 @@ public class Route implements Comparable
     public int size()
     {
         return nodeList.size();
+    }
+
+    public void setFrequency(double f)
+    {
+        revFreq = f;
+        frequency = f;
     }
 
     @Override

@@ -106,6 +106,7 @@ public class RouteSetCrossover extends Crossover
 
     private RouteSet[] doRouteSetCrossover(RouteSet[] parent, TNDP prob)
     {
+        HashMap<Integer, ArrayList<Integer>> zoneNeedAttention = new HashMap<Integer, ArrayList<Integer>>();
         RouteSet[] children = new RouteSet[numOfOffspring];
         RouteSet[] parentCopy = new RouteSet[2];
         parentCopy[0] = (RouteSet) parent[0].deepCopy();
@@ -148,11 +149,11 @@ public class RouteSetCrossover extends Crossover
                 {
                     Route cr = parentCopy[curParent].getRoute(i);
                     Set<Integer> commonNodes = intersect(chosen, new HashSet<>(cr.nodeList));
-                    if (!commonNodes.isEmpty())
-                    {
+                    // if (!commonNodes.isEmpty())
+                    // {
                         eligileRoutes.add(cr);
                         props.add(1.0 * (cr.size() - commonNodes.size()) / cr.size());
-                    }
+                    // }
                 }
                 if (eligileRoutes.isEmpty())
                 {
@@ -177,7 +178,7 @@ public class RouteSetCrossover extends Crossover
                 children[count].routeSet.add(sr.deepCopy());
                 chosen.addAll(sr.nodeList);
             }
-            if (chosen.size() < Vertices)
+            if (!prob.isAllZoneCovered(chosen, zoneNeedAttention, children[0].routeSet))
             {
                 feasible = children[count].repair(chosen, prob);
             } else
@@ -188,6 +189,7 @@ public class RouteSetCrossover extends Crossover
             //System.out.print(attempt + ",");
             // } while (!feasible);
         }
+        prob.route_destination_check(children[0].routeSet, "Crossover function");
 
         return children;
     }

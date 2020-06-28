@@ -12,7 +12,10 @@ import grph.Grph;
 import grph.in_memory.InMemoryGrph;
 import grph.io.EdgeListReader;
 import grph.properties.NumericalProperty;
+
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,10 +24,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.Collections;
+import com.google.common.collect.Sets;
+
 import jmetal.core.Variable;
 import jmetal.encodings.solutionType.RouteSetSolutionType;
 import jmetal.encodings.variable.Route;
 import jmetal.encodings.variable.RouteSet;
+import jmetal.util.PseudoRandom;
 
 /**
  *
@@ -34,12 +42,20 @@ public class TNDP extends Problem
 {
 
     private int numOfRoutes;
-    private int[][] demand;
+    private HashMap<Integer, int[]> demand;
     private int[][] time;
+    private double[] centroid_distance;
+    private int[] zone_ref;
+    HashMap<Integer, ArrayList<Integer>> zoneStopMapping = new HashMap<Integer, ArrayList<Integer>>();
+    HashMap<Integer, Integer> zoneIndexMapping = new HashMap<Integer, Integer>();
+    HashMap<Integer, Integer> bug_fix = new HashMap<Integer, Integer>();
     private double totalDemand;
     public Grph g;
     private NumericalProperty EdgeWeight;
     public Instance ins;
+    protected int[] shelters = new int[] {14, 47, 48};
+    private int fleetSize = 100;
+    private int called = 0;
 
     public TNDP(int _numOfRoutes, Instance _ins) throws Exception
     {
@@ -47,14 +63,17 @@ public class TNDP extends Problem
         numOfRoutes = _numOfRoutes;
         ins = _ins;
         numberOfVariables_ = 1;
-        numberOfObjectives_ = 7;
+        numberOfObjectives_ = 4;
         numberOfConstraints_ = 2;
         problemName_ = ins.getName() + "-" +_numOfRoutes;
-        demand = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
+        demand = new HashMap<Integer, int[]>();
         time = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
+        centroid_distance = new double[ins.getNumOfVertices()];
+        zone_ref = new int[ins.getNumOfVertices()];
         solutionType_ = new RouteSetSolutionType(this);
         readFromFile(ins.getTimeFile(), time);
-        totalDemand = readFromFile(ins.getDemandFile(), demand);
+        totalDemand = readDemandFromFile(ins.getDemandFile(), demand);
+        fixZones(ins.getZoneListFile(), centroid_distance);
         InputStream fml = new FileInputStream(ins.getEdgeListFile());
         EdgeWeight = new NumericalProperty(null, 8, 0);
         EdgeListReader.alterGraph(g, fml, false, false, null);
@@ -63,7 +82,7 @@ public class TNDP extends Problem
     public static class OBJECTIVES
     {
 
-        public static final int IVTT = 0, WT = 1, TP = 2, UP = 3, FS = 4, RL = 5, DO = 6;
+        public static final int IVTT = 0, WT = 1, CD = 2, RL = 3;
     }
 
     @Override
@@ -73,9 +92,9 @@ public class TNDP extends Problem
         RouteSet rs = (RouteSet) var[0];
         int Vertices = ins.getNumOfVertices();
         double[][] routeDemand = new double[rs.size()][];
-        ArrayList[][] allPath = new ArrayList[Vertices][Vertices];
-        HashMap[][] allPathClass = new HashMap[Vertices][Vertices];
-        HashMap[][] allPathGroup = new HashMap[Vertices][Vertices];
+        ArrayList[][] allPath = new ArrayList[zoneIndexMapping.size()+1][shelters.length];
+        HashMap[][] allPathClass = new HashMap[zoneIndexMapping.size()+1][shelters.length];
+        // HashMap[][] allPathGroup = new HashMap[Vertices][Vertices];
         int[][] edgeUsage = new int[Vertices][Vertices];
         double[][] edgeFreqSum = new double[Vertices][Vertices];
 
@@ -85,52 +104,63 @@ public class TNDP extends Problem
             routeDemand[k] = new double[rs.getRoute(k).size()];
         }
         
-        for (int i = 0; i < Vertices; i++)
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet())
         {
-            for (int j = i + 1; j < Vertices; j++)
+            for (int j = 0; j < shelters.length; j++)
             {
-
-                ArrayList<Path> paths = generateAllPath(i, j, rs);
+                ArrayList<Path> paths = generateAllPath(entry.getValue(), shelters[j], rs);
                 HashMap<Integer, ArrayList<Path>> pathClass = new HashMap<>();
-                HashMap<String, ArrayList<Path>> pathGroup = new HashMap<>();
-                if (paths.isEmpty()) //unsatisfied
-                {
-                    paths = null;
-                    pathClass = null;
-                    pathGroup = null;
-                    rs.d[2] += demand[i][j];
-                } else
-                {
-                    screenPath(paths, rs);
-                    classifyPaths(paths, pathClass, pathGroup);
-                    rs.d[paths.get(0).getNumOfSegment() - 1] += demand[i][j]; //d0 => 1 segement, d1=> 2 segment
-                }
-                allPath[i][j] = paths;
-                allPathClass[i][j] = pathClass;
-                allPathGroup[i][j] = pathGroup;
+                // HashMap<String, ArrayList<Path>> pathGroup = new HashMap<>();
+                screenPath(paths, rs);
+                classifyPaths(paths, pathClass/*, pathGroup*/);
+                // if (paths.isEmpty()) //unsatisfied
+                // {
+                //     paths = null;
+                //     pathClass = null;
+                //     pathGroup = null;
+                //     rs.d[2] += demand[i][j];
+                // } else
+                // {
+                //     screenPath(paths, rs);
+                //     classifyPaths(paths, pathClass, pathGroup);
+                //     rs.d[paths.get(0).getNumOfSegment() - 1] += demand[i][j]; //d0 => 1 segement, d1=> 2 segment
+                // }
+                allPath[getIndex(entry.getKey())][j] = paths;
+                allPathClass[getIndex(entry.getKey())][j] = pathClass;
+                // allPathGroup[i][j] = pathGroup;
 
             }
         }
-        do
-        {
+        // do
+        // {
             for (int k = 0; k < rs.size(); k++)
             {
                 Arrays.fill(routeDemand[k], 0);
             }
-            for (int i = 0; i < Vertices; i++)
+            for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet())
             {
-                for (int j = i + 1; j < Vertices; j++)
+                for (int j = 0; j < shelters.length; j++)
                 {
-                    if (allPath[i][j] != null)
-                    {
-                        splitDemand(allPath[i][j], allPathClass[i][j], allPathGroup[i][j], rs);
-                        assignDemand(allPath[i][j], demand[i][j], rs, routeDemand);
-
-                    }
-
+                    splitDemand(allPath[getIndex(entry.getKey())][j], allPathClass[getIndex(entry.getKey())][j]);
+                    assignDemand(allPath[getIndex(entry.getKey())][j], demand.get(entry.getKey())[j], rs, routeDemand);
                 }
             }
-        } while (!findMLS(rs, routeDemand));
+        // } while (!findMLS(rs, routeDemand));
+        for (int i = 0; i < rs.size(); i++)
+        {
+            double MLSDemand = routeDemand[i][1];
+            int MLS = 1;
+            for (int j = 2; j < routeDemand[i].length; j++)
+            {
+                if (routeDemand[i][j] > MLSDemand)
+                {
+                    MLS = j;
+                    MLSDemand = routeDemand[i][j];
+                }
+
+            }
+            rs.getRoute(i).setFrequency((double) (fleetSize * MLSDemand) / totalDemand);
+        }
         
         for (int k = 0; k < rs.size(); k++)
         {
@@ -154,82 +184,96 @@ public class TNDP extends Problem
             rs.getRoute(k).calculateCongestionFactor(edgeFreqSum);
         }
         solution.setObjective(OBJECTIVES.RL, totalRL);
-        solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
+        // solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
         
-        rs.d[0] = rs.d[0] / totalDemand; //direct
-        rs.d[1] = rs.d[1] / totalDemand; // 1-transfer
-        rs.d[2] = rs.d[2] / totalDemand; // unsatisfied
-        solution.setObjective(OBJECTIVES.TP, rs.d[1]);
-        solution.setObjective(OBJECTIVES.UP, rs.d[2]);
-        double totalFS = 0;
-        for (int k = 0; k < rs.size(); k++)
-        {
-            totalFS += rs.getRoute(k).calculateFleetSize();
-        }
-        solution.setObjective(OBJECTIVES.FS, totalFS);
+        // rs.d[0] = rs.d[0] / totalDemand; //direct
+        // rs.d[1] = rs.d[1] / totalDemand; // 1-transfer
+        // rs.d[2] = rs.d[2] / totalDemand; // unsatisfied
+        // solution.setObjective(OBJECTIVES.TP, rs.d[1]);
+        // solution.setObjective(OBJECTIVES.UP, rs.d[2]);
+        // double totalFS = 0;
+        // for (int k = 0; k < rs.size(); k++)
+        // {
+        //     totalFS += rs.getRoute(k).calculateFleetSize();
+        // }
+        // solution.setObjective(OBJECTIVES.FS, totalFS);
+        solution.setObjective(OBJECTIVES.CD, calculateObjectiveCD(rs));
         solution.setObjective(OBJECTIVES.IVTT, calculateObjectiveIVTT(allPath, rs));
         solution.setObjective(OBJECTIVES.WT, calculateObjectiveWT(allPath, rs));
+        // ++called;
+        // if (called % 5000 == 0){
+        //     System.out.println("It is called: "+ called +" times.");
+        // }
+        
     }
 
-    private ArrayList<Path> generateAllPath(int s, int d, RouteSet rs)
+    private ArrayList<Path> generateAllPath(ArrayList<Integer> l, int d, RouteSet rs)
     {
         ArrayList<Path> paths = new ArrayList<>();
         ArrayList<Set<Integer>> routeNodeSet = new ArrayList<>();
-        Set<Integer> routesHavingS = new HashSet<>();
-        Set<Integer> routesHavingD = new HashSet<>();
+        
         for (int i = 0; i < rs.size(); i++)
         {
             routeNodeSet.add(new HashSet<Integer>(rs.getRouteArrayList(i)));
-            if (routeNodeSet.get(i).contains(s))
-            {
-                routesHavingS.add(i);
-            }
-            if (routeNodeSet.get(i).contains(d))
-            {
-                routesHavingD.add(i);
-            }
-        }
-
-        Set<Integer> commonRoutes = intersect(routesHavingS, routesHavingD);
-        if (commonRoutes.size() > 0) //direct path using one route
-        {
-            for (int i : commonRoutes)
-            {
-                Path p = new Path(s, d);
-                p.addSegment(i, s, d);
-                paths.add(p);
-                p.setName("Path from " + s + " to " + d + ": " + "(R" + i + "," + s + "," + d + ")");
-            }
-        } else
-        {
-            for (int ro : routesHavingS)
-            {
-                for (int rd : routesHavingD)
-                {
-                    Set<Integer> commonNodes = intersect(routeNodeSet.get(ro), routeNodeSet.get(rd));
-                    if (commonNodes.size() > 0)
-                    {
-                        for (int i : commonNodes)
-                        {
-                            Path p = new Path(s, d);
-                            p.addSegment(ro, s, i);
-                            p.addSegment(rd, i, d);
-                            paths.add(p);
-                            p.setName("Path from " + s + " to " + d + ": " + "(R" + ro + "," + s + "," + i + ")" + "(R" + rd + "," + i + "," + d + ")");
-                            break;
-                        }
-                    }
+            // if (routeNodeSet.get(i).contains(s))
+            // {
+            //     routesHavingS.add(i);
+            // }
+            // if (routeNodeSet.get(i).contains(d))
+            // {
+            //     routesHavingD.add(i);
+            // }
+            for (Integer s: l) {
+                if (routeNodeSet.get(i).contains(s) && routeNodeSet.get(i).contains(d)) {
+                    Path p = new Path(s, d);
+                    p.addSegment(i, s, d);
+                    paths.add(p);
+                    p.setName("Path from " + s + " to " + d + ": " + "(R" + i + "," + s + "," + d + ")");
                 }
             }
         }
 
+        
+        // if (commonRoutes.size() > 0) //direct path using one route
+        // {
+        //     for (int i : commonRoutes)
+        //     {
+        //         Path p = new Path(s, d);
+        //         p.addSegment(i, s, d);
+        //         paths.add(p);
+        //         p.setName("Path from " + s + " to " + d + ": " + "(R" + i + "," + s + "," + d + ")");
+        //     }
+        // } 
+        // else
+        // {
+        //     for (int ro : routesHavingS)
+        //     {
+        //         for (int rd : routesHavingD)
+        //         {
+        //             Set<Integer> commonNodes = intersect(routeNodeSet.get(ro), routeNodeSet.get(rd));
+        //             if (commonNodes.size() > 0)
+        //             {
+        //                 for (int i : commonNodes)
+        //                 {
+        //                     Path p = new Path(s, d);
+        //                     p.addSegment(ro, s, i);
+        //                     p.addSegment(rd, i, d);
+        //                     paths.add(p);
+        //                     p.setName("Path from " + s + " to " + d + ": " + "(R" + ro + "," + s + "," + i + ")" + "(R" + rd + "," + i + "," + d + ")");
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
         return paths;
     }
 
-    private static void classifyPaths(ArrayList<Path> paths, HashMap<Integer, ArrayList<Path>> pathClass, HashMap<String, ArrayList<Path>> pathGroup)
+    private static void classifyPaths(ArrayList<Path> paths, HashMap<Integer, ArrayList<Path>> pathClass)
     {
 
-        boolean transfer = paths.get(0).needTransfer();
+        // boolean transfer = paths.get(0).needTransfer();
         for (Path p : paths)
         {
             if (pathClass.containsKey(p.getRouteOfSeg(0)))
@@ -242,20 +286,20 @@ public class TNDP extends Problem
                 pList.add(p);
                 pathClass.put(p.getRouteOfSeg(0), pList);
             }
-            if (transfer)
-            {
-                String groupKey = p.getRouteAndEndOfSeg(0);
-                if (pathGroup.containsKey(groupKey))
-                {
-                    ArrayList<Path> pList = pathGroup.get(groupKey);
-                    pList.add(p);
-                } else
-                {
-                    ArrayList<Path> pList = new ArrayList<>();
-                    pList.add(p);
-                    pathGroup.put(groupKey, pList);
-                }
-            }
+            // if (transfer)
+            // {
+            //     String groupKey = p.getRouteAndEndOfSeg(0);
+            //     if (pathGroup.containsKey(groupKey))
+            //     {
+            //         ArrayList<Path> pList = pathGroup.get(groupKey);
+            //         pList.add(p);
+            //     } else
+            //     {
+            //         ArrayList<Path> pList = new ArrayList<>();
+            //         pList.add(p);
+            //         pathGroup.put(groupKey, pList);
+            //     }
+            // }
         }
     }
 
@@ -327,42 +371,58 @@ public class TNDP extends Problem
         }
     }
 
-    private void splitDemand(ArrayList<Path> paths, HashMap<Integer, ArrayList<Path>> pathClass, HashMap<String, ArrayList<Path>> pathGroup, RouteSet rs)
-    {
-        boolean transfer = paths.get(0).needTransfer();;
-        double sumFrequency = 0;
-        for (int routeId : pathClass.keySet())
-        {
-            sumFrequency += rs.getRoute(routeId).frequency;
+    public void route_destination_check(ArrayList<Route> routeSet, String s) {
+        for (Route r: routeSet) {
+            if (!isShelter(r.nodeList.get(r.nodeList.size() - 1))) {
+                System.out.println("Last node is not shelter ... "+ s);
+                System.exit(0);
+            }
         }
+    }
+
+    private void splitDemand(ArrayList<Path> paths, HashMap<Integer, ArrayList<Path>> pathClass/*,HashMap<String, ArrayList<Path>> pathGroup, RouteSet rs*/)
+    {
+        // boolean transfer = paths.get(0).needTransfer();;
+        double sumTotalTravelTimeINV = 0.0;
         for (int routeId : pathClass.keySet())
         {
-            double routeFreq = rs.getRoute(routeId).frequency;
-            int totalPath = pathClass.get(routeId).size();
             for (Path p : pathClass.get(routeId))
             {
-                p.demandPerc = 1.0 * routeFreq / (sumFrequency * totalPath);
+                assert p.totalInVehicleTime > 0.0;
+                sumTotalTravelTimeINV += (1.0 * pathClass.get(routeId).size() / p.totalInVehicleTime);
             }
         }
-        if (transfer)
+        assert sumTotalTravelTimeINV > 0.0;
+        
+        for (int routeId : pathClass.keySet())
         {
-            for (Map.Entry<String, ArrayList<Path>> entry : pathGroup.entrySet())
+            double totalTravelTimeINV;
+            //int totalPath = pathClass.get(routeId).size();
+            for (Path p : pathClass.get(routeId))
             {
-                ArrayList<Path> pList = entry.getValue();
-                double sumFreq = 0;
-                double sumDemand = 0;
-                for (Path p : pList)
-                {
-                    sumDemand += p.demandPerc;
-                    sumFreq += rs.getRoute(p.getRouteOfSeg(1)).frequency;
-                }
-                for (Path p : pList)
-                {
-                    double routeFreq = rs.getRoute(p.getRouteOfSeg(1)).frequency;
-                    p.demandPerc = 1.0 * sumDemand * routeFreq / sumFreq;
-                }
+                totalTravelTimeINV = 1.0 / p.totalInVehicleTime;
+                p.demandPerc = totalTravelTimeINV / (sumTotalTravelTimeINV);
             }
         }
+        // if (transfer)
+        // {
+        //     for (Map.Entry<String, ArrayList<Path>> entry : pathGroup.entrySet())
+        //     {
+        //         ArrayList<Path> pList = entry.getValue();
+        //         double sumFreq = 0;
+        //         double sumDemand = 0;
+        //         for (Path p : pList)
+        //         {
+        //             sumDemand += p.demandPerc;
+        //             sumFreq += rs.getRoute(p.getRouteOfSeg(1)).frequency;
+        //         }
+        //         for (Path p : pList)
+        //         {
+        //             double routeFreq = rs.getRoute(p.getRouteOfSeg(1)).frequency;
+        //             p.demandPerc = 1.0 * sumDemand * routeFreq / sumFreq;
+        //         }
+        //     }
+        // }
 
     }
 
@@ -436,54 +496,54 @@ public class TNDP extends Problem
         return res;
     }
 
-    private double calculateObjectiveIVTT(ArrayList<Path>[][] allPath)
-    {
-        double total = 0;
-        int vertices = ins.getNumOfVertices();
-        for (int i = 0; i < vertices; i++)
-        {
-            for (int j = i + 1; j < vertices; j++)
-            {
-                if (allPath[i][j] != null)
-                {
-                    for (Path p : allPath[i][j])
-                    {
-                        total += p.demandPerc * demand[i][j] * p.totalInVehicleTime;
-                    }
+    // private double calculateObjectiveIVTT(ArrayList<Path>[][] allPath)
+    // {
+    //     double total = 0;
+    //     int vertices = ins.getNumOfVertices();
+    //     for (int i = 0; i < vertices; i++)
+    //     {
+    //         for (int j = i + 1; j < vertices; j++)
+    //         {
+    //             if (allPath[i][j] != null)
+    //             {
+    //                 for (Path p : allPath[i][j])
+    //                 {
+    //                     total += p.demandPerc * demand[i][j] * p.totalInVehicleTime;
+    //                 }
 
-                }
+    //             }
 
-            }
-        }
-        return total;
-    }
+    //         }
+    //     }
+    //     return total;
+    // }
     
     private double calculateObjectiveIVTT(ArrayList<Path>[][] allPath, RouteSet rs) //ITS Revision: Consider congestion
     {
         double total = 0;
         int vertices = ins.getNumOfVertices();
-        for (int i = 0; i < vertices; i++)
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet())
         {
-            for (int j = i + 1; j < vertices; j++)
+            for (int j = 0; j < shelters.length; j++)
             {
-                if (allPath[i][j] != null)
+                if (allPath[getIndex(entry.getKey())][j] != null)
                 {
-                    if (allPath[i][j].get(0).getNumOfSegment() == 1) //direct path with no transfer, uses only one route
-                    {
-                        for (Path p : allPath[i][j])
+                    // if (allPath[entry.getKey()][j].get(0).getNumOfSegment() == 1) //direct path with no transfer, uses only one route
+                    // {
+                        for (Path p : allPath[getIndex(entry.getKey())][j])
                         {   
                             Route r = rs.getRoute(p.getRouteOfSeg(0));
-                            total += p.demandPerc * demand[i][j] * p.totalInVehicleTime * r.getCongestionFactor(); //ITS Revision: Consider congestion
+                            total += p.demandPerc * demand.get(entry.getKey())[j] * p.totalInVehicleTime * r.getCongestionFactor(); //ITS Revision: Consider congestion
                         }                         
-                    }
-                    else
-                    {
-                        calculateCongestedTravelTime(allPath[i][j], rs); 
-                        for (Path p : allPath[i][j])
-                        {                       
-                            total += p.demandPerc * demand[i][j] * p.totalInVehicleTimeCongested; //ITS Revision: Consider congestion
-                        }                        
-                    }
+                    // }
+                    // else
+                    // {
+                    //     calculateCongestedTravelTime(allPath[i][j], rs); 
+                    //     for (Path p : allPath[i][j])
+                    //     {                       
+                    //         total += p.demandPerc * demand.get(entry.getKey())[j] * p.totalInVehicleTimeCongested; //ITS Revision: Consider congestion
+                    //     }                        
+                    // }
 
 
                 }
@@ -497,13 +557,13 @@ public class TNDP extends Problem
     {
         double totalWT = 0;
         int vertices = ins.getNumOfVertices();
-        for (int i = 0; i < vertices; i++)
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet())
         {
-            for (int j = i + 1; j < vertices; j++)
+            for (int j = 0; j < shelters.length; j++)
             {
-                if (allPath[i][j] != null)
+                if (allPath[getIndex(entry.getKey())][j] != null)
                 {
-                    for (Path p : (ArrayList<Path>) allPath[i][j]) //for each path
+                    for (Path p : (ArrayList<Path>) allPath[getIndex(entry.getKey())][j]) //for each path
                     {
                         double pathWT = 0;
                         for (int k = 0; k < p.segList.size(); k++)
@@ -511,7 +571,7 @@ public class TNDP extends Problem
                             Route r = rs.getRoute(p.getRouteOfSeg(k));
                             pathWT += r.calculateWaitingTime() * r.getCongestionFactor(); //ITS Revision: Consider congestion
                         }
-                        totalWT += p.demandPerc * demand[i][j] * pathWT;
+                        totalWT += p.demandPerc * demand.get(entry.getKey())[j] * pathWT;
                     }
 
                 }
@@ -520,6 +580,19 @@ public class TNDP extends Problem
         }
         return totalWT;
     }
+    private double calculateObjectiveCD(RouteSet rs) {
+        double centroid_distance = 0;
+        for (int i = 0; i < rs.size(); i++) {
+            Route r = rs.getRoute(i);
+            for (Integer s: r.nodeList) {
+                if (!isShelter(s)) {
+                    centroid_distance += this.centroid_distance[s];
+                }
+            }
+        }
+        return centroid_distance;
+    }
+
 
     private double calculateObjectiveDO(int[][] edgeUsage, RouteSet rs)
     {
@@ -558,16 +631,206 @@ public class TNDP extends Problem
         return numOfRoutes;
     }
 
-    public int getDemand(int i, int j)
-    {
-        return demand[i][j];
-    }
+    // public int getDemand(int i, int j)
+    // {
+    //     return demand[i][j];
+    // }
 
     public int getTime(int i, int j)
     {
         return time[i][j];
     }
 
+    public boolean isShelter(int stop) {
+        for (int i = 0; i < shelters.length; i++ ){
+            if (shelters[i] == stop)
+                return true;
+        }
+        return false;
+    }
+
+    public int getNumberofShelters() {
+        return shelters.length;
+    }
+    public int getNumberofZones() {
+        return zoneStopMapping.size();
+    }
+    public ArrayList<Integer> getAllStops(int zoneId) {
+        return zoneStopMapping.get(zoneId);
+    }
+    public int getZone(int stop) {
+        return zone_ref[stop];
+    }
+    public int getIndex(int zone) {
+        return zoneIndexMapping.get(zone);
+    }
+    public void bugFixing() {
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet()) {
+            if (bug_fix.get(entry.getKey()) != zoneStopMapping.get(entry.getKey()).size()) {
+                System.out.println(zoneStopMapping.get(entry.getKey()));
+                System.out.println(entry.getKey());
+                java.lang.System.exit(0);
+            }
+        }
+    }
+    public ArrayList<Integer> uncoveredNodes(Set<Integer> coveredNodes) {
+        HashMap<Integer, ArrayList<Integer>> isZoneCovered = new HashMap<Integer, ArrayList<Integer>>();
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet()) {
+            isZoneCovered.put(entry.getKey(), new ArrayList<Integer>(entry.getValue()));
+        }
+        int zoneId;
+        for (Integer s: coveredNodes){
+            if (isShelter(s)) 
+                continue;
+            zoneId = zone_ref[s];
+            isZoneCovered.get(zoneId).clear();
+        }
+        // bugFixing();
+        ArrayList<Integer> uncovered = new ArrayList<Integer>();
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : isZoneCovered.entrySet()) {
+            if (!entry.getValue().isEmpty()){
+                uncovered.addAll(entry.getValue());
+            }
+        }
+        
+        return uncovered;
+    }
+    public Boolean isAllZoneCovered(Set<Integer> coveredNodes, 
+        HashMap<Integer, ArrayList<Integer>> zoneNeedAttention, ArrayList<Route> routeSet) {
+        if (!uncoveredNodes(coveredNodes).isEmpty())
+            return false;
+        zoneNeedAttention.clear();
+        for (int i = 0; i < shelters.length; i++) {
+            zoneNeedAttention.put(shelters[i], new ArrayList<Integer>());
+        }
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet()) {
+            for (int i = 0; i < shelters.length; i++) {
+                zoneNeedAttention.get(shelters[i]).add(entry.getKey());
+            }
+            for (Route r: routeSet) {
+                for (Integer s: r.shelterList) {
+                    Set<Integer> set1 = new HashSet<Integer>(entry.getValue());
+                    Set<Integer> set2 = new HashSet<Integer>(r.nodeList);
+                    if (Sets.intersection(set1, set2).size() > 0) {
+                        zoneNeedAttention.get(s).remove(new Integer(entry.getKey()));
+                    }
+                }
+            }
+        } 
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneNeedAttention.entrySet()) {
+            if (entry.getValue().size() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public double[] setFitness(ArrayList<Integer> neighbours, Set<Integer> chosenNodes){
+        double fit[] = new double[neighbours.size()];
+        double total = 0, size = 0;
+        int notReachedPerZone = 0;
+        HashMap<Integer, Double> zones = new HashMap<Integer, Double>(); 
+        for (Integer s: neighbours) {
+            zones.put(s, 0.0);
+        }
+        for (Map.Entry<Integer, Double> entry : zones.entrySet()) {
+            notReachedPerZone = 0;
+            if (!isShelter(entry.getKey()))
+            {
+                for (Integer s: zoneStopMapping.get(zone_ref[entry.getKey()])) {
+                    if (!chosenNodes.contains(s)){
+                        notReachedPerZone++;
+                    }
+                }
+                size = zoneStopMapping.get(zone_ref[entry.getKey()]).size();
+                zones.put(entry.getKey(), (double) (1.0 * notReachedPerZone / size));
+            }
+            else {
+                zones.put(entry.getKey(), PseudoRandom.randDouble());
+            }
+        }
+        for (int k = 0; k < neighbours.size(); k++)
+        {
+            fit[k] = zones.get(neighbours.get(k));
+        }
+        return fit;
+    }
+    public int[] determineRoute(int source) {
+        double fit[] = new double[3];
+        int paths[][] = new int[3][]; 
+        double total = 0.0;
+        for (int i = 0; i < shelters.length; i++ ){
+            if (g.containsAPath(source, shelters[i])){
+                paths[i] = g.getShortestPath(source, shelters[i], EdgeWeight).toVertexArray();
+                fit[i] = (double) (1.0 / paths[i].length);                 
+                total += fit[i];
+            }
+            else {
+                fit[i] = 0.0;
+            }
+            // System.out.println(fit[i]);
+        }
+        
+        int p = PseudoRandom.roulette_wheel(fit, 0);
+        return paths[p];
+    }
+    public boolean nodeCanBeDeleted(RouteSet rs, int node) 
+    {
+        if (isShelter(node)) {
+            return false;
+        }
+        int zone = zone_ref[node];
+        ArrayList<Integer> temp = new ArrayList<Integer>(zoneStopMapping.get(zone));
+        temp.remove(new Integer(node));
+        if (temp.isEmpty())
+            return false;
+        HashMap<Integer, Boolean> isReached = new HashMap<Integer, Boolean>();
+        for (int i = 0; i < shelters.length; i++) {
+            isReached.put(shelters[i], false);
+        }
+        Set<Integer> set1 = new HashSet<Integer>(temp);
+        for (int i = 0; i < rs.size(); i++)
+        {
+            Route r = rs.getRoute(i);
+            Set<Integer> set2 = new HashSet<Integer>(r.nodeList);
+            if (!Collections.disjoint(set1, set2)) {
+                for (Integer s: r.shelterList) {
+                    isReached.replace(s, true);
+                }
+            }
+        }
+        for (Integer s: isReached.keySet()) {
+            if (!isReached.get(s)) {
+                return false;                    
+            }
+        }
+        return true;
+    }
+    private int readDemandFromFile(String fileName, HashMap<Integer, int[]> data) throws Exception
+    {
+        int sum = 0;
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        int zone=0, index, d;
+        String line;
+        while((line = reader.readLine()) != null){
+            index = 0;
+            // System.out.println(line);
+            for (String stop : line.split(" ")) {
+                if (index == 0) {
+                    zone = Integer.parseInt(stop);
+                    demand.put(zone, new int[3]);
+                    zoneIndexMapping.put(zone, zoneIndexMapping.size());
+                }
+                else {
+                    d = Integer.parseInt(stop);
+                    demand.get(zone)[index - 1] = d;
+                    sum += d;
+                }
+                index++;
+            }
+        }
+        reader.close();
+        return sum;
+    }
     private double readFromFile(String fileName, int[][] data) throws Exception
     {
 
@@ -592,6 +855,32 @@ public class TNDP extends Problem
 
         sc.close();
         return sum / 2;
+    }
+    private void fixZones(String fileName, double[] centroid_distance) throws Exception
+    {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        int index, zone = 0;
+        int stopId = 0;
+        String line ;
+        while((line = reader.readLine()) != null){
+            index = 0;
+            for (String stop : line.split(" ")) {
+                if (index == 0) {
+                    zone = Integer.parseInt(stop);
+                    zoneStopMapping.put(zone, new ArrayList<Integer>());
+                }
+                else {
+                    stopId = Integer.parseInt(stop);
+                    zoneStopMapping.get(zone).add(stopId);
+                    centroid_distance[stopId] = PseudoRandom.randDouble(0.1, 100.0);
+                    zone_ref[stopId] = zone;
+                }
+                index++;
+            }
+            bug_fix.put(zone, index - 1);
+        }
+        reader.close();
+        return;
     }
     public int[][] getTime()
     {

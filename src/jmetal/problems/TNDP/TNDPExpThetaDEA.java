@@ -21,9 +21,9 @@ import jmetal.util.JMException;
 public class TNDPExpThetaDEA extends Experiment
 {
 
-    private static final double[] crossoverProbabilityList = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
+    private static final double[] crossoverProbabilityList = {0.5}; //0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 
     private static final String[] selectionList = new String[]{"RandomSelection"}; //, "RetativeTournamentSelection"
-    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand","RouteSetAddDelTELRand","RouteSetAddDelTEORand", "RouteSetCombinedRandomMutation", "RouteSetCombinedGuidedMutation"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
+    private static final String[] mutationList = new String[]{ "RouteSetAddDelRand"}; //"RouteSetAddDelMutation","RouteSetAddDelTELRand","RouteSetAddDelTEORand"
     private static String[] algoNameList = new String[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     private static HashMap[] parameterList = new HashMap[crossoverProbabilityList.length*selectionList.length*mutationList.length];
     @Override
@@ -82,7 +82,7 @@ public class TNDPExpThetaDEA extends Experiment
         
         exp.problemList_ = new String[] //Can be extended
         {
-            "M1-15"
+            "M1-20"
         };
 
         exp.paretoFrontFile_ = new String[]{"M1-15.pf"}; //must be set as length of problemList_   String[]{"front.pf"}
@@ -95,14 +95,14 @@ public class TNDPExpThetaDEA extends Experiment
 
         exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
-        exp.independentRuns_ = 15;
+        exp.independentRuns_ = 20;
 
         exp.initExperiment();
 
         // Run the experiments
         int numberOfThreads;
-        //exp.runExperiment(numberOfThreads = 1);
-        exp.generateQualityIndicators();
-        exp.generateLatexTables() ;
+        exp.runExperiment(numberOfThreads = 1);
+//        exp.generateQualityIndicators();
+//        exp.generateLatexTables() ;
     }
 }

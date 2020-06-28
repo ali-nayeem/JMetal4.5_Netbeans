@@ -88,7 +88,7 @@ public class RouteSetAddlMutation extends Mutation
                 continue;
             }
 
-            for (int j = 1; j > -1; j--)
+            for (int j = 0; j > -1; j--)
             {
                 while (r.size() < maxNode)
                 {
@@ -115,6 +115,7 @@ public class RouteSetAddlMutation extends Mutation
                 }
             }
         }
+        prob.route_destination_check(rs.routeSet, "Add Function");
     }
 
     private int numberOfNodes(int Max, int r)
