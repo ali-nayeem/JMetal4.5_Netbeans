@@ -137,6 +137,10 @@ public class RouteSet extends Variable
                     {
                         throw new Error("No shelter in the path");
                     }
+                    if (!prob.isImmediateNode(primary_route[primary_route.length - 2]))
+                    {
+                        throw new Error("No immediate node in the path");
+                    }
                     chosenLocal = (Set<Integer>) ((HashSet<Integer>) chosen).clone();
                     chosenCountLocal = chosenCount.clone();
                     r = new Route();
@@ -174,9 +178,9 @@ public class RouteSet extends Variable
                             else {
                                 curNode = unused.get(PseudoRandom.roulette_wheel(fit, total));    
                             }
-                            if (prob.isShelter(curNode)) {
-                                r.addShelter(curNode);                                    
-                            }
+//                            if (prob.isShelter(curNode)) {
+//                                r.addShelter(curNode);                                    
+//                            }
                             r.nodeList.add(0, curNode);
                             chosenLocal.add(curNode);
                             chosenCountLocal[curNode]++;

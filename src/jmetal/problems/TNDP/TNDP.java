@@ -33,6 +33,7 @@ import jmetal.encodings.solutionType.RouteSetSolutionType;
 import jmetal.encodings.variable.Route;
 import jmetal.encodings.variable.RouteSet;
 import jmetal.util.PseudoRandom;
+import jmetal.util.DPQ;
 
 /**
  *
@@ -43,7 +44,7 @@ public class TNDP extends Problem
 
     private int numOfRoutes;
     private HashMap<Integer, int[]> demand;
-    private int[][] time;
+    private double[][] time;
     private double[] centroid_distance;
     private int[] zone_ref;
     HashMap<Integer, ArrayList<Integer>> zoneStopMapping = new HashMap<Integer, ArrayList<Integer>>();
@@ -53,9 +54,16 @@ public class TNDP extends Problem
     public Grph g;
     private NumericalProperty EdgeWeight;
     public Instance ins;
-    protected int[] shelters = new int[] {14, 47, 48};
-    private int fleetSize = 100;
+    protected int[] shelters = new int[] {381, 382};
+    public HashMap<Integer, int []> shelter_immediate_node = new HashMap<Integer, int []>() {{
+        put(381, new int [] {169, 218});
+        put(382, new int [] {199, 299});    
+    }};
+    public int [] immediate_node = new int [] {169, 218, 199, 299};
+    public HashMap<String, ArrayList<Integer>> all_shortest_paths = new HashMap<String, ArrayList<Integer>>();
+    private int fleetSize = 332;
     private int called = 0;
+    private DPQ graphHelper;
 
     public TNDP(int _numOfRoutes, Instance _ins) throws Exception
     {
@@ -67,7 +75,7 @@ public class TNDP extends Problem
         numberOfConstraints_ = 2;
         problemName_ = ins.getName() + "-" +_numOfRoutes;
         demand = new HashMap<Integer, int[]>();
-        time = new int[ins.getNumOfVertices()][ins.getNumOfVertices()];
+        time = new double[ins.getNumOfVertices()][ins.getNumOfVertices()];
         centroid_distance = new double[ins.getNumOfVertices()];
         zone_ref = new int[ins.getNumOfVertices()];
         solutionType_ = new RouteSetSolutionType(this);
@@ -77,6 +85,8 @@ public class TNDP extends Problem
         InputStream fml = new FileInputStream(ins.getEdgeListFile());
         EdgeWeight = new NumericalProperty(null, 8, 0);
         EdgeListReader.alterGraph(g, fml, false, false, null);
+        graphHelper = new DPQ(g, time);
+        // prepareAllShortestPaths();
     }
 
     public static class OBJECTIVES
@@ -636,17 +646,80 @@ public class TNDP extends Problem
     //     return demand[i][j];
     // }
 
-    public int getTime(int i, int j)
+    public double getTime(int i, int j)
     {
         return time[i][j];
     }
 
+    public boolean isShelterOrImmediateNode(int stop) {
+        for (int i = 0; i < shelters.length; i++ ){
+            if (shelters[i] == stop)
+                return true;
+        }
+        for (int i = 0; i < immediate_node.length; i++ ){
+            if (immediate_node[i] == stop)
+                return true; 
+        }
+        return false;
+    }
+    
     public boolean isShelter(int stop) {
         for (int i = 0; i < shelters.length; i++ ){
             if (shelters[i] == stop)
                 return true;
         }
         return false;
+    }
+    
+    public boolean isImmediateNode(int stop) {
+        for (int i = 0; i < immediate_node.length; i++ ){
+            if (immediate_node[i] == stop)
+                return true; 
+        }
+        return false;
+    }
+    
+    public String convertToString3(int depot, int in_node, int shelter) {
+        return String.valueOf(depot) + "->" + String.valueOf(in_node) + "->" + String.valueOf(shelter);
+    } 
+    
+    public void prepareAllShortestPaths() {
+        int paths[][] = new int[immediate_node.length][]; 
+        ArrayList<Integer> p = new ArrayList<Integer>();
+        for (int i = 0; i < ins.getNumOfVertices(); i++) {
+            if (isShelterOrImmediateNode(i))
+                continue;
+            for (Map.Entry<Integer, int []> entry: shelter_immediate_node.entrySet()) {
+                // System.out.println("Key: "+ entry.getKey());
+                for (int j = 0; j < shelter_immediate_node.get(entry.getKey()).length; j++ ){
+                    graphHelper.set_forbidden_nodes(immediate_node, shelter_immediate_node.get(entry.getKey())[j]);
+                    p = graphHelper.dijkstra(i, shelter_immediate_node.get(entry.getKey())[j]);
+                    p.add(entry.getKey());
+                    all_shortest_paths.put(convertToString3(i, shelter_immediate_node.get(entry.getKey())[j],
+                        entry.getKey()), p);
+                }
+            }
+        }
+        
+    }
+    
+    public ArrayList<Integer> removeForbiddenNodes(ArrayList<Integer> adjNodes) {
+        adjNodes.removeIf(e -> isShelterOrImmediateNode(e));
+//        for (Integer e: adjNodes) {
+//            for (int i = 0; i < shelters.length; i++ ){
+//                if (shelters[i] == e) {
+//                    adjNodes.remove(new Integer(e));
+//                    break;
+//                }  
+//            }
+//            for (int i = 0; i < immediate_node.length; i++ ){
+//                if (immediate_node[i] == e) {
+//                    adjNodes.remove(new Integer(e));
+//                    break;
+//                } 
+//            }
+//        }
+        return adjNodes;
     }
 
     public int getNumberofShelters() {
@@ -697,8 +770,7 @@ public class TNDP extends Problem
     }
     public Boolean isAllZoneCovered(Set<Integer> coveredNodes, 
         HashMap<Integer, ArrayList<Integer>> zoneNeedAttention, ArrayList<Route> routeSet) {
-        if (!uncoveredNodes(coveredNodes).isEmpty())
-            return false;
+        
         zoneNeedAttention.clear();
         for (int i = 0; i < shelters.length; i++) {
             zoneNeedAttention.put(shelters[i], new ArrayList<Integer>());
@@ -717,6 +789,8 @@ public class TNDP extends Problem
                 }
             }
         } 
+        if (!uncoveredNodes(coveredNodes).isEmpty())
+            return false;
         for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneNeedAttention.entrySet()) {
             if (entry.getValue().size() > 0) {
                 return false;
@@ -755,23 +829,35 @@ public class TNDP extends Problem
         return fit;
     }
     public int[] determineRoute(int source) {
-        double fit[] = new double[3];
-        int paths[][] = new int[3][]; 
+        double fit[] = new double[immediate_node.length];
+        int paths[][] = new int[immediate_node.length][]; 
         double total = 0.0;
-        for (int i = 0; i < shelters.length; i++ ){
-            if (g.containsAPath(source, shelters[i])){
-                paths[i] = g.getShortestPath(source, shelters[i], EdgeWeight).toVertexArray();
-                fit[i] = (double) (1.0 / paths[i].length);                 
-                total += fit[i];
-            }
-            else {
-                fit[i] = 0.0;
-            }
+        int index = 0;
+        ArrayList<Integer> p = new ArrayList<Integer>();
+        for (Map.Entry<Integer, int []> entry: shelter_immediate_node.entrySet()) {
+            // System.out.println("Key: "+ entry.getKey());
+            for (int i = 0; i < shelter_immediate_node.get(entry.getKey()).length; i++ ){
+                if (g.containsAPath(source, shelter_immediate_node.get(entry.getKey())[i])){
+                    // paths[i] = g.getShortestPath(source, shelters[i], EdgeWeight).toVertexArray();
+                    graphHelper.set_forbidden_nodes(immediate_node, shelter_immediate_node.get(entry.getKey())[i]);
+                    p = graphHelper.dijkstra(source, shelter_immediate_node.get(entry.getKey())[i]);
+                    p.add(entry.getKey());
+//                    p = all_shortest_paths.
+//                            get(convertToString3(source, shelter_immediate_node.get(entry.getKey())[i], entry.getKey()));
+                    paths[index] = p.stream().mapToInt(j -> j).toArray();
+                    fit[index] = (double) (1.0 / paths[index].length);                 
+                    total += fit[index];
+                }
+                else {
+                    fit[index] = 0.0;
+                }
+                index++;
             // System.out.println(fit[i]);
+            }
         }
         
-        int p = PseudoRandom.roulette_wheel(fit, 0);
-        return paths[p];
+        
+        return paths[PseudoRandom.roulette_wheel(fit, 0)];
     }
     public boolean nodeCanBeDeleted(RouteSet rs, int node) 
     {
@@ -831,7 +917,7 @@ public class TNDP extends Problem
         reader.close();
         return sum;
     }
-    private double readFromFile(String fileName, int[][] data) throws Exception
+    private double readFromFile(String fileName, double[][] data) throws Exception
     {
 
         double sum = 0;
@@ -844,10 +930,10 @@ public class TNDP extends Problem
                 String s = sc.next();
                 if (s.equals("-"))
                 {
-                    data[i][j] = Integer.MAX_VALUE;
+                    data[i][j] = Double.MAX_VALUE;
                 } else
                 {
-                    data[i][j] = Integer.parseInt(s);
+                    data[i][j] =  Double.parseDouble(s);
                     sum += data[i][j];
                 }
             }
@@ -882,7 +968,7 @@ public class TNDP extends Problem
         reader.close();
         return;
     }
-    public int[][] getTime()
+    public double[][] getTime()
     {
         return time;
     }

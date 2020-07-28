@@ -117,7 +117,7 @@ public class Route implements Comparable
         return length;
     }
 
-    public double calculateRouteLength_RoundTrip_edgeOverlap(int[][] time, int[][] edgeUsage, double[][] edgeFreqSum)
+    public double calculateRouteLength_RoundTrip_edgeOverlap(double[][] time, int[][] edgeUsage, double[][] edgeFreqSum)
     {
         roundTripTime = 0;
         for (int i = 1; i < nodeList.size(); i++)
