@@ -54,7 +54,7 @@ public class TNDP extends Problem
     public Grph g;
     private NumericalProperty EdgeWeight;
     public Instance ins;
-    protected int[] shelters = new int[] {381, 382};
+    public int[] shelters = new int[] {381, 382};
     public HashMap<Integer, int []> shelter_immediate_node = new HashMap<Integer, int []>() {{
         put(381, new int [] {169, 218});
         put(382, new int [] {199, 299});    
@@ -731,6 +731,9 @@ public class TNDP extends Problem
     public ArrayList<Integer> getAllStops(int zoneId) {
         return zoneStopMapping.get(zoneId);
     }
+    public Set<Integer> getAllZones() {
+        return zoneStopMapping.keySet();
+    }
     public int getZone(int stop) {
         return zone_ref[stop];
     }
@@ -828,14 +831,14 @@ public class TNDP extends Problem
         }
         return fit;
     }
-    public int[] determineRoute(int source) {
-        double fit[] = new double[immediate_node.length];
-        int paths[][] = new int[immediate_node.length][]; 
+    public int[] determineRoute(int source, int sink) {
+        double fit[] = new double[immediate_node.length / shelters.length];
+        int paths[][] = new int[immediate_node.length / shelters.length][]; 
         double total = 0.0;
         int index = 0;
         ArrayList<Integer> p = new ArrayList<Integer>();
         for (Map.Entry<Integer, int []> entry: shelter_immediate_node.entrySet()) {
-            // System.out.println("Key: "+ entry.getKey());
+            if (entry.getKey() != sink) continue;
             for (int i = 0; i < shelter_immediate_node.get(entry.getKey()).length; i++ ){
                 if (g.containsAPath(source, shelter_immediate_node.get(entry.getKey())[i])){
                     // paths[i] = g.getShortestPath(source, shelters[i], EdgeWeight).toVertexArray();

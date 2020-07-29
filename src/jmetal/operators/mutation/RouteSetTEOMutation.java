@@ -70,7 +70,7 @@ public class RouteSetTEOMutation extends Mutation
         int minNode = prob.ins.getMinNode();
         int maxNode = prob.ins.getMaxNode();
         int Vertices = prob.ins.getNumOfVertices();
-        int[][] time = prob.getTime();
+        double[][] time = prob.getTime();
 
         int I = numberOfNodes(maxNode, rs.size());
         Grph reducedGraph = new InMemoryGrph();

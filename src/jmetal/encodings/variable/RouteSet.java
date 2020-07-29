@@ -103,6 +103,14 @@ public class RouteSet extends Variable
         int numOfVertices = prob.ins.getNumOfVertices();
         int maxNode = prob.ins.getMaxNode();
         int minNode = prob.ins.getMinNode();
+        Set <Integer> zones = prob.getAllZones();
+        ArrayList<Integer> uncovered = new ArrayList<Integer>();
+        for (int i = 0; i < prob.shelters.length; i++) {
+            zoneNeedAttention.put(prob.shelters[i], new ArrayList<Integer>());
+            for (Integer z: zones) {
+                zoneNeedAttention.get(prob.shelters[i]).add(z);
+            }
+        }
         boolean feasible;
         do
         {
@@ -115,7 +123,18 @@ public class RouteSet extends Variable
             {
                 int routeLength = PseudoRandom.nextInt(maxNode - minNode + 1) + minNode;
                 int firstNode;
-                while(prob.isShelter(firstNode = PseudoRandom.nextInt(numOfVertices)));
+                int shelter = prob.shelters[PseudoRandom.nextInt(prob.shelters.length)];
+                uncovered.clear();
+                for (Integer  z: zoneNeedAttention.get(shelter)) {
+                    uncovered.addAll(prob.getAllStops(z));
+                }
+                if (uncovered.isEmpty()) {
+                    while(prob.isShelter(firstNode = PseudoRandom.nextInt(numOfVertices)));
+                }
+                else {
+                    firstNode = uncovered.get(PseudoRandom.nextInt(uncovered.size()));
+                }
+                
                 
                 // if (count == 0)
                 // {
@@ -132,7 +151,8 @@ public class RouteSet extends Variable
                 do
                 {
                     // determine shelter and primary route
-                    int [] primary_route = prob.determineRoute(firstNode);
+                    int [] primary_route = prob.determineRoute(firstNode, shelter);
+                    shelter = primary_route[primary_route.length - 1];
                     if (!prob.isShelter(primary_route[primary_route.length - 1]))
                     {
                         throw new Error("No shelter in the path");
@@ -149,6 +169,9 @@ public class RouteSet extends Variable
                         r.nodeList.add(primary_route[i]);
                         chosenLocal.add(primary_route[i]);
                         chosenCountLocal[primary_route[i]]++;
+                        if (!prob.isShelter(primary_route[i])) {
+                            zoneNeedAttention.get(shelter).remove(new Integer(prob.getZone(primary_route[i])));
+                        }
                     }
 
                     int curNode = firstNode;
@@ -184,6 +207,10 @@ public class RouteSet extends Variable
                             r.nodeList.add(0, curNode);
                             chosenLocal.add(curNode);
                             chosenCountLocal[curNode]++;
+                            if (!prob.isShelter(curNode)) {
+                                zoneNeedAttention.get(shelter)
+                                    .remove(new Integer(prob.getZone(curNode)));
+                            }
                         } else
                         {
                             r.reverseEnd();
@@ -199,15 +226,16 @@ public class RouteSet extends Variable
                 
             }
             
-            if (!prob.isAllZoneCovered(chosen, zoneNeedAttention, routeSet))
-            {
-                feasible = repair(chosen, prob);
-            } else
-            {
+//            if (!prob.isAllZoneCovered(chosen, zoneNeedAttention, routeSet))
+//            {
+//                feasible = repair(chosen, prob);
+//            } else
+//            {
                 feasible = true;
-            }
+            // }
 
         } while (!feasible);
+        System.out.println("Luckily, it is finished ... ");
         prob.route_destination_check(routeSet, "Generate Route Set");
     }
 
