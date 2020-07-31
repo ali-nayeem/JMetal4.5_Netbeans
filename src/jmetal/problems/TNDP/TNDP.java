@@ -71,7 +71,7 @@ public class TNDP extends Problem
         numOfRoutes = _numOfRoutes;
         ins = _ins;
         numberOfVariables_ = 1;
-        numberOfObjectives_ = 4;
+        numberOfObjectives_ = 5;
         numberOfConstraints_ = 2;
         problemName_ = ins.getName() + "-" +_numOfRoutes;
         demand = new HashMap<Integer, int[]>();
@@ -92,7 +92,7 @@ public class TNDP extends Problem
     public static class OBJECTIVES
     {
 
-        public static final int IVTT = 0, WT = 1, CD = 2, RL = 3;
+        public static final int IVTT = 0, WT = 1, CD = 2, RL = 3, UP = 4;
     }
 
     @Override
@@ -121,20 +121,20 @@ public class TNDP extends Problem
                 ArrayList<Path> paths = generateAllPath(entry.getValue(), shelters[j], rs);
                 HashMap<Integer, ArrayList<Path>> pathClass = new HashMap<>();
                 // HashMap<String, ArrayList<Path>> pathGroup = new HashMap<>();
-                screenPath(paths, rs);
-                classifyPaths(paths, pathClass/*, pathGroup*/);
-                // if (paths.isEmpty()) //unsatisfied
-                // {
-                //     paths = null;
-                //     pathClass = null;
-                //     pathGroup = null;
-                //     rs.d[2] += demand[i][j];
-                // } else
-                // {
-                //     screenPath(paths, rs);
-                //     classifyPaths(paths, pathClass, pathGroup);
-                //     rs.d[paths.get(0).getNumOfSegment() - 1] += demand[i][j]; //d0 => 1 segement, d1=> 2 segment
-                // }
+//                screenPath(paths, rs);
+//                classifyPaths(paths, pathClass/*, pathGroup*/);
+                 if (paths.isEmpty()) //unsatisfied
+                 {
+                     paths = null;
+                     pathClass = null;
+                     rs.d[1] += demand.get(entry.getKey())[j];
+                 } 
+                 else
+                 {
+                     screenPath(paths, rs);
+                     classifyPaths(paths, pathClass/*, pathGroup*/);
+                     rs.d[paths.get(0).getNumOfSegment() - 1] += demand.get(entry.getKey())[j]; //d0 => 1 segement
+                 }
                 allPath[getIndex(entry.getKey())][j] = paths;
                 allPathClass[getIndex(entry.getKey())][j] = pathClass;
                 // allPathGroup[i][j] = pathGroup;
@@ -151,8 +151,10 @@ public class TNDP extends Problem
             {
                 for (int j = 0; j < shelters.length; j++)
                 {
-                    splitDemand(allPath[getIndex(entry.getKey())][j], allPathClass[getIndex(entry.getKey())][j]);
-                    assignDemand(allPath[getIndex(entry.getKey())][j], demand.get(entry.getKey())[j], rs, routeDemand);
+                    if (allPath[getIndex(entry.getKey())][j] != null) {
+                        splitDemand(allPath[getIndex(entry.getKey())][j], allPathClass[getIndex(entry.getKey())][j]);
+                        assignDemand(allPath[getIndex(entry.getKey())][j], demand.get(entry.getKey())[j], rs, routeDemand);
+                    }
                 }
             }
         // } while (!findMLS(rs, routeDemand));
@@ -196,11 +198,11 @@ public class TNDP extends Problem
         solution.setObjective(OBJECTIVES.RL, totalRL);
         // solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
         
-        // rs.d[0] = rs.d[0] / totalDemand; //direct
-        // rs.d[1] = rs.d[1] / totalDemand; // 1-transfer
+        rs.d[0] = rs.d[0] / totalDemand; //direct
+        rs.d[1] = rs.d[1] / totalDemand; // unsatisfied
         // rs.d[2] = rs.d[2] / totalDemand; // unsatisfied
         // solution.setObjective(OBJECTIVES.TP, rs.d[1]);
-        // solution.setObjective(OBJECTIVES.UP, rs.d[2]);
+        solution.setObjective(OBJECTIVES.UP, rs.d[1]);
         // double totalFS = 0;
         // for (int k = 0; k < rs.size(); k++)
         // {
