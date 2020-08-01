@@ -150,6 +150,7 @@ public class RouteSet extends Variable
                 double chosenCountLocal[];
                 do
                 {
+                    boolean reverse_done = false;
                     // determine shelter and primary route
                     int [] primary_route = prob.determineRoute(firstNode, shelter);
                     shelter = primary_route[primary_route.length - 1];
@@ -213,9 +214,19 @@ public class RouteSet extends Variable
                             }
                         } else
                         {
+                            // System.out.printf("unused is empty, current route length %d\n", r.size());
+                            if (reverse_done && r.size() > minNode) {
+                                // System.out.printf("route has crossed min node, breaking loop, current route length %d, expected length %d \n", r.size(), routeLength);
+                                break;
+                            }
                             r.reverseEnd();
+                            reverse_done = true;
                             curNode = r.nodeList.get(0);
                         }
+                    }
+                    if (reverse_done && r.size() > minNode) {
+                        // System.out.printf("route has crossed min node, breaking loop, current route length %d, expected length %d \n", r.size(), routeLength);
+                        break;
                     }
                 } while (r.size() <= routeLength / 2 || r.size() < minNode);
                 routeSet.add(r);
@@ -223,7 +234,7 @@ public class RouteSet extends Variable
                 chosenCount = chosenCountLocal;
                 // System.out.println(routeSet);
                 prob.route_destination_check(routeSet, "Before Repair call");
-                
+                // System.out.printf("Created %d route\n", count);
             }
             
 //            if (!prob.isAllZoneCovered(chosen, zoneNeedAttention, routeSet))
@@ -235,7 +246,7 @@ public class RouteSet extends Variable
             // }
 
         } while (!feasible);
-        System.out.println("Luckily, it is finished ... ");
+        // System.out.println("Luckily, generating routeset is finished ... ");
         prob.route_destination_check(routeSet, "Generate Route Set");
     }
 

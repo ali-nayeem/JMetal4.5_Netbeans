@@ -122,7 +122,12 @@ public class Route implements Comparable
         roundTripTime = 0;
         for (int i = 1; i < nodeList.size(); i++)
         {
-            roundTripTime += time[nodeList.get(i)][nodeList.get(i - 1)];
+            if (time[nodeList.get(i)][nodeList.get(i - 1)] == Double.MAX_VALUE) {
+                roundTripTime += 100.0;
+            }
+            else {
+                roundTripTime += time[nodeList.get(i)][nodeList.get(i - 1)];
+            }
             edgeUsage[nodeList.get(i)][nodeList.get(i - 1)] = ++edgeUsage[nodeList.get(i - 1)][nodeList.get(i)];
             edgeFreqSum[nodeList.get(i)][nodeList.get(i - 1)] = (edgeFreqSum[nodeList.get(i - 1)][nodeList.get(i)] += this.frequency);
         }
@@ -150,7 +155,8 @@ public class Route implements Comparable
         {
             throw new Error("Attempt to get route length before calculaution");
         }
-        return congestionFactor; 
+        // return congestionFactor; 
+        return 1.00;
     }
 
     public double getLength()

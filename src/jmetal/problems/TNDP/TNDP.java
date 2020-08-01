@@ -335,6 +335,10 @@ public class TNDP extends Problem
                 }
                 for (si++; si <= ei; si++)
                 {
+                    if (time[r.nodeList.get(si)][r.nodeList.get(si - 1)] == Double.MAX_VALUE) {
+                        totalTime += 100.0;
+                        continue;
+                    }
                     totalTime += time[r.nodeList.get(si)][r.nodeList.get(si - 1)];
                 }
             }
