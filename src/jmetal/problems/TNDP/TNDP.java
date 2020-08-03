@@ -61,7 +61,8 @@ public class TNDP extends Problem
     }};
     public int [] immediate_node = new int [] {169, 218, 199, 299};
     public HashMap<String, ArrayList<Integer>> all_shortest_paths = new HashMap<String, ArrayList<Integer>>();
-    private int fleetSize = 332;
+    private int fleetSize = 322;
+    private double velocity = 8.333;  // it is 30km/hr
     private int called = 0;
     private DPQ graphHelper;
 
@@ -71,7 +72,7 @@ public class TNDP extends Problem
         numOfRoutes = _numOfRoutes;
         ins = _ins;
         numberOfVariables_ = 1;
-        numberOfObjectives_ = 5;
+        numberOfObjectives_ = 4;
         numberOfConstraints_ = 2;
         problemName_ = ins.getName() + "-" +_numOfRoutes;
         demand = new HashMap<Integer, int[]>();
@@ -92,7 +93,7 @@ public class TNDP extends Problem
     public static class OBJECTIVES
     {
 
-        public static final int IVTT = 0, WT = 1, CD = 2, RL = 3, UP = 4;
+        public static final int IVTT = 0, CD = 1, RL = 2, UP = 3;
     }
 
     @Override
@@ -102,6 +103,7 @@ public class TNDP extends Problem
         RouteSet rs = (RouteSet) var[0];
         int Vertices = ins.getNumOfVertices();
         double[][] routeDemand = new double[rs.size()][];
+        int[] routeMLS = new int[rs.size()];
         ArrayList[][] allPath = new ArrayList[zoneIndexMapping.size()+1][shelters.length];
         HashMap[][] allPathClass = new HashMap[zoneIndexMapping.size()+1][shelters.length];
         // HashMap[][] allPathGroup = new HashMap[Vertices][Vertices];
@@ -158,6 +160,7 @@ public class TNDP extends Problem
                 }
             }
         // } while (!findMLS(rs, routeDemand));
+        int totalMLS = 0;
         for (int i = 0; i < rs.size(); i++)
         {
             double MLSDemand = routeDemand[i][1];
@@ -171,12 +174,51 @@ public class TNDP extends Problem
                 }
 
             }
-            rs.getRoute(i).setFrequency((double) (fleetSize * MLSDemand) / totalDemand);
+            routeMLS[i] = (int) Math.ceil(MLSDemand);
+            totalMLS += (int) Math.ceil(MLSDemand);
+            rs.getRoute(i).fleet = 1;
         }
-        
+        ArrayList<Integer> random_number_list = new ArrayList<Integer>();
+        for (int i = 0; i < fleetSize - rs.size(); i++) {
+            random_number_list.add(PseudoRandom.nextInt(totalMLS));
+        }
+        Collections.sort(random_number_list);
+        int r_index = 0;
+        int cum_demand = routeMLS[r_index];
+        for (Integer e: random_number_list) {
+            if (cum_demand < e) {
+                while(cum_demand < e) {
+                    cum_demand += routeMLS[++r_index];
+                }
+
+            }
+            rs.getRoute(r_index).fleet++;
+        }
+        // this code is for testing
+        int totalfleet = 0;
+        for (int i = 0; i < rs.size(); i++)
+        {
+            totalfleet += rs.getRoute(i).fleet;
+        }
+        if (totalfleet != fleetSize) {
+            System.out.println(totalfleet + " " + fleetSize);
+            System.out.println("Accidentally, fleetSize is incorrect");
+            throw new Error("Accidentally, fleetSize is incorrect");
+        }
+        double evacuationTime = Double.MIN_VALUE;
+        int tripRequired = 0;
+        double RL, timeRequired, del;
         for (int k = 0; k < rs.size(); k++)
         {
-            totalRL += rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage, edgeFreqSum);
+            tripRequired = (int) Math.ceil(routeMLS[k]/rs.getRoute(k).getCapacity());
+            RL = rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage, edgeFreqSum);
+            totalRL += RL;
+            del = (2 * RL) / (velocity * rs.getRoute(k).fleet);
+            timeRequired = (tripRequired / rs.getRoute(k).fleet) * (2 * RL) / (velocity)
+                + (tripRequired % rs.getRoute(k).fleet) * (2 * RL) / (velocity) 
+                + (tripRequired % rs.getRoute(k).fleet - 1) * del;
+            
+            evacuationTime = Math.max(evacuationTime, timeRequired);
         }
         
         for (int i = 0; i < edgeFreqSum.length; i++)
@@ -210,8 +252,8 @@ public class TNDP extends Problem
         // }
         // solution.setObjective(OBJECTIVES.FS, totalFS);
         solution.setObjective(OBJECTIVES.CD, calculateObjectiveCD(rs));
-        solution.setObjective(OBJECTIVES.IVTT, calculateObjectiveIVTT(allPath, rs));
-        solution.setObjective(OBJECTIVES.WT, calculateObjectiveWT(allPath, rs));
+        solution.setObjective(OBJECTIVES.IVTT, evacuationTime);
+        // solution.setObjective(OBJECTIVES.WT, calculateObjectiveWT(allPath, rs));
         // ++called;
         // if (called % 5000 == 0){
         //     System.out.println("It is called: "+ called +" times.");

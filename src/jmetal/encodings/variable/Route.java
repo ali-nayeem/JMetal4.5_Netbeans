@@ -19,6 +19,7 @@ public class Route implements Comparable
     public ArrayList<Integer> shelterList = new ArrayList<>();
     //int id;
     public double frequency = 1;
+    public int fleet = 1;
     double revFreq = -1;
     double roundTripTime;
     int MLS;
@@ -183,6 +184,11 @@ public class Route implements Comparable
     {
         return nodeList.size();
     }
+    
+    public int getCapacity()
+    {
+        return busCap;
+    }
 
     public void setFrequency(double f)
     {
@@ -225,6 +231,7 @@ public class Route implements Comparable
         r.length = length;
         r.revCount = revCount;
         r.addAtEnd = addAtEnd;
+        r.fleet = fleet;
         return r;
     }
 
