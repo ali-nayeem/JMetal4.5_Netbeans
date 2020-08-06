@@ -72,7 +72,7 @@ public class TNDP extends Problem
         numOfRoutes = _numOfRoutes;
         ins = _ins;
         numberOfVariables_ = 1;
-        numberOfObjectives_ = 4;
+        numberOfObjectives_ = 5;
         numberOfConstraints_ = 2;
         problemName_ = ins.getName() + "-" +_numOfRoutes;
         demand = new HashMap<Integer, int[]>();
@@ -93,7 +93,7 @@ public class TNDP extends Problem
     public static class OBJECTIVES
     {
 
-        public static final int IVTT = 0, CD = 1, RL = 2, UP = 3;
+        public static final int IVTT = 0, CD = 1, RL = 2, UP = 3, DO = 4;
     }
 
     @Override
@@ -215,7 +215,7 @@ public class TNDP extends Problem
             totalRL += RL;
             del = (2 * RL) / (velocity * rs.getRoute(k).fleet);
             timeRequired = (tripRequired / rs.getRoute(k).fleet) * (2 * RL) / (velocity)
-                + (tripRequired % rs.getRoute(k).fleet) * (2 * RL) / (velocity) 
+                + (tripRequired % rs.getRoute(k).fleet) * (RL) / (velocity) 
                 + (tripRequired % rs.getRoute(k).fleet - 1) * del;
             
             evacuationTime = Math.max(evacuationTime, timeRequired);
@@ -238,7 +238,7 @@ public class TNDP extends Problem
             rs.getRoute(k).calculateCongestionFactor(edgeFreqSum);
         }
         solution.setObjective(OBJECTIVES.RL, totalRL);
-        // solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
+        solution.setObjective(OBJECTIVES.DO, calculateObjectiveDO(edgeUsage, rs));        
         
         rs.d[0] = rs.d[0] / totalDemand; //direct
         rs.d[1] = rs.d[1] / totalDemand; // unsatisfied
@@ -658,12 +658,15 @@ public class TNDP extends Problem
         for (Route r : rs.routeSet)
         {
             double routeDO = 0;
-            for (int i = 1; i < r.nodeList.size(); i++)
-            {
+            for (int i = 1; i < r.nodeList.size(); i++) {
                 int v0 = r.nodeList.get(i), v1 = r.nodeList.get(i - 1);
-                if (edgeUsage[v0][v1] > 1)
-                {
-                    routeDO += time[v0][v1];
+                if (edgeUsage[v0][v1] > 1) {
+                    // routeDO += time[v0][v1];
+                    if (time[v0][v1] == Double.MAX_VALUE) {
+                        routeDO += 100.0;
+                    } else {
+                        routeDO += time[v0][v1];
+                    }
                 }
             }
             totalDO += routeDO / r.getLength();
