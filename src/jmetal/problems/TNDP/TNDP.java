@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import com.google.common.collect.Sets;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import jmetal.core.Variable;
 import jmetal.encodings.solutionType.RouteSetSolutionType;
@@ -34,6 +37,7 @@ import jmetal.encodings.variable.Route;
 import jmetal.encodings.variable.RouteSet;
 import jmetal.util.PseudoRandom;
 import jmetal.util.DPQ;
+import javafx.util.Pair;
 
 /**
  *
@@ -65,7 +69,9 @@ public class TNDP extends Problem
     private double velocity = 8.333;  // it is 30km/hr
     private int called = 0;
     private DPQ graphHelper;
-
+    HashSet<Integer> sharedStops = new HashSet<Integer>();
+    HashMap<Integer, ArrayList<Pair<Integer, Integer>>> sharedStopsStatistics = new HashMap<Integer, ArrayList<Pair<Integer, Integer>>>();
+    HashMap<Integer, Integer> computedPracticalDelay = new HashMap<Integer, Integer>();
     public TNDP(int _numOfRoutes, Instance _ins) throws Exception
     {
         g = new InMemoryGrph();
@@ -104,6 +110,9 @@ public class TNDP extends Problem
         int Vertices = ins.getNumOfVertices();
         double[][] routeDemand = new double[rs.size()][];
         int[] routeMLS = new int[rs.size()];
+        double[] theoreticalTime = new double[rs.size()];
+        double[] practicalTime = new double[rs.size()];
+        computedPracticalDelay.clear();
         ArrayList[][] allPath = new ArrayList[zoneIndexMapping.size()+1][shelters.length];
         HashMap[][] allPathClass = new HashMap[zoneIndexMapping.size()+1][shelters.length];
         // HashMap[][] allPathGroup = new HashMap[Vertices][Vertices];
@@ -115,7 +124,7 @@ public class TNDP extends Problem
         {
             routeDemand[k] = new double[rs.getRoute(k).size()];
         }
-        
+        setSharedStops(rs);
         for (Map.Entry<Integer, ArrayList<Integer>> entry : zoneStopMapping.entrySet())
         {
             for (int j = 0; j < shelters.length; j++)
@@ -208,19 +217,82 @@ public class TNDP extends Problem
         double evacuationTime = Double.MIN_VALUE;
         int tripRequired = 0;
         double RL, timeRequired, del;
+        int first_stoping_time = 0, stoping_time;
         for (int k = 0; k < rs.size(); k++)
         {
-            tripRequired = (int) Math.ceil(routeMLS[k]/rs.getRoute(k).getCapacity());
+            tripRequired = (int) Math.ceil((double) routeMLS[k]/rs.getRoute(k).getCapacity());
             RL = rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage, edgeFreqSum);
             totalRL += RL;
             del = (2 * RL) / (velocity * rs.getRoute(k).fleet);
-            timeRequired = (tripRequired / rs.getRoute(k).fleet) * (2 * RL) / (velocity)
-                + (tripRequired % rs.getRoute(k).fleet) * (RL) / (velocity) 
-                + (tripRequired % rs.getRoute(k).fleet - 1) * del;
-            
-            evacuationTime = Math.max(evacuationTime, timeRequired);
+            for (int kk = 0; kk < rs.getRoute(k).nodeList.size(); kk++) {
+                int to = rs.getRoute(k).nodeList.get(kk);
+                if (kk == 0) {
+                    first_stoping_time = 0;
+                }
+                else 
+                {
+                    int from = rs.getRoute(k).nodeList.get(kk - 1);
+                    if (time[to][from] == Double.MAX_VALUE) {
+                        first_stoping_time += 100.0;
+                    }
+                    else {
+                        first_stoping_time += time[to][from];
+                    }
+                }
+                if (sharedStops.contains(rs.getRoute(k).nodeList.get(kk))) {
+                    stoping_time = first_stoping_time;
+                    for (int tt = 0; tt < tripRequired; tt++) {
+                        sharedStopsStatistics.get(to)
+                                .add(new Pair<>(k, stoping_time));
+                        stoping_time += del;
+                    }
+                }
+            }
+//            timeRequired = ((tripRequired / rs.getRoute(k).fleet) * (2 * RL) / (velocity))
+//                + ((tripRequired % rs.getRoute(k).fleet) * (RL) / (velocity)) 
+//                + ((tripRequired % rs.getRoute(k).fleet - 1) * del);
+            timeRequired = (tripRequired - 1) * del + (RL) / (velocity);
+            if (timeRequired <= 0) {
+                throw new Error("Accidentally, evacuation time is invalid");
+            }
+            theoreticalTime[k] = (int) timeRequired;
+            // evacuationTime = Math.max(evacuationTime, timeRequired);
         }
+        // Let's compute the practical evacuation time
+        int delay;
         
+        for (Integer stop: sharedStops) {
+            if (sharedStopsStatistics.get(stop).size() > 1) {
+                Collections.sort(sharedStopsStatistics.get(stop), new Comparator<Pair<Integer, Integer>>() {
+                    @Override
+                    public int compare(final Pair<Integer, Integer> o1, final Pair<Integer, Integer> o2) {
+                        return o1.getValue() - o2.getValue();
+                    }
+                });
+            }
+        }
+        for (int k = 0; k < rs.size(); k++)
+        {
+            for (int kk = 0; kk < rs.getRoute(k).nodeList.size(); kk++) { 
+                int stop = rs.getRoute(k).nodeList.get(kk);
+                if (sharedStops.contains(stop) && sharedStopsStatistics.get(stop).size() > 1)
+                {
+                    if (!computedPracticalDelay.containsKey(stop)) {
+                        computedPracticalDelay.put
+                            (stop, computePracticalOverhead(sharedStopsStatistics.get(stop), 4));
+//                        if (immediate_node[0] == stop || immediate_node[1] == stop
+//                           || immediate_node[2] == stop || immediate_node[3] == stop) {
+//                            System.out.println("Immediate Node: " + Integer.toString(stop) 
+//                            + " has delay: " + Integer.toString(computedPracticalDelay.get(stop)));
+//                        }
+                    }
+                    practicalTime[k] += computedPracticalDelay.get(stop);
+                }
+            }
+//            System.out.println("Theoretical Time: " + Double.toString(theoreticalTime[k]) +
+//                    "Practical Time: " + Double.toString(practicalTime[k]));
+            evacuationTime = Math.max(evacuationTime, theoreticalTime[k] + practicalTime[k]);
+        }
         for (int i = 0; i < edgeFreqSum.length; i++)
         {
             for (int j = i + 1; j < edgeFreqSum.length; j++)
@@ -944,6 +1016,61 @@ public class TNDP extends Problem
             }
         }
         return true;
+    }
+    public void setSharedStops(RouteSet routeSet) 
+    {
+        sharedStops.clear();
+        ArrayList<Integer> tempList = new ArrayList<Integer>();
+        for (int i = 0; i < routeSet.size(); i++) {
+            for (int j = i + 1; j < routeSet.size(); j++) {
+                tempList.clear();
+                tempList.addAll(routeSet.getRoute(i).nodeList);
+                tempList.removeAll(routeSet.getRoute(i).shelterList);  // removing shelters
+                tempList.retainAll(routeSet.getRoute(i).nodeList);   // keeping common stops
+                if (!tempList.isEmpty()) {
+                    sharedStops.addAll(tempList);
+                }
+            }
+        }
+        // System.out.println("The number of shared bus stops is " + Integer.toString(sharedStops.size()));
+        sharedStopsStatistics.clear();
+        for (Integer stop : sharedStops) {
+            sharedStopsStatistics.put(stop, new ArrayList<Pair<Integer, Integer>>());
+        }
+    }
+    public int computePracticalOverhead(ArrayList<Pair<Integer, Integer>> stopping_time, int Road_Width) {
+        // System.out.println("Length of array: " + Integer.toString(stopping_time.size()));
+        int opening_time = stopping_time.get(0).getValue();
+        int available_slots = Road_Width;
+        int Stand_time = 50;
+        Queue<Integer> queue = new LinkedList<>();
+        
+        int delay = 0;  // we are doing all this to compute it.
+        for (Pair <Integer, Integer> time: stopping_time) {
+            int t_i = time.getValue();
+            if (queue.size() < Road_Width) {
+                // has empty slot
+                queue.add(t_i);
+            }
+            else {
+                int head = queue.poll();
+                if (head + Stand_time <= time.getValue()) {
+                    // no delay
+                    delay += 0;
+                }
+                else {
+                    delay += (head + Stand_time - t_i);
+                }
+                queue.add(t_i);
+            }
+            while(queue.peek() + Stand_time <= t_i) {
+                queue.remove();
+            }
+            if (queue.size() > Road_Width) {
+                throw new Error("Queue exceeds the size of Road_Width");
+            }
+        }
+        return delay;
     }
     private int readDemandFromFile(String fileName, HashMap<Integer, int[]> data) throws Exception
     {
