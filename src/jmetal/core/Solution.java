@@ -51,6 +51,11 @@ public class Solution implements Serializable
      * Stores the objectives values of the solution.
      */
     private final double[] objective_;
+    
+    /**
+     * Stores the practical delay of the solution.
+     */
+    private double practical_delay_;
 
     /**
      * Stores the number of objective values of the solution
@@ -124,6 +129,7 @@ public class Solution implements Serializable
         type_ = null;
         variable_ = null;
         objective_ = null;
+        practical_delay_ = 0.0;
 
     } // Solution
 
@@ -139,7 +145,7 @@ public class Solution implements Serializable
     {
         numberOfObjectives_ = numberOfObjectives;
         objective_ = new double[numberOfObjectives];
-
+        practical_delay_ = 0.0;
         normalizedObjective_ = new double[numberOfObjectives_];
 
     }
@@ -156,7 +162,7 @@ public class Solution implements Serializable
         type_ = problem.getSolutionType();
         numberOfObjectives_ = problem.getNumberOfObjectives();
         objective_ = new double[numberOfObjectives_];
-
+        practical_delay_ = 0.0;
         normalizedObjective_ = new double[numberOfObjectives_];
 
         // Setting initial values
@@ -187,7 +193,7 @@ public class Solution implements Serializable
         type_ = problem.getSolutionType();
         numberOfObjectives_ = problem.getNumberOfObjectives();
         objective_ = new double[numberOfObjectives_];
-
+        practical_delay_ = 0.0;
         normalizedObjective_ = new double[numberOfObjectives_];
 
         // Setting initial values
@@ -213,7 +219,7 @@ public class Solution implements Serializable
 
         numberOfObjectives_ = solution.getNumberOfObjectives();
         objective_ = new double[numberOfObjectives_];
-
+        practical_delay_ = 0;
         normalizedObjective_ = new double[numberOfObjectives_];
 
         for (int i = 0; i < objective_.length; i++)
@@ -342,6 +348,16 @@ public class Solution implements Serializable
     {
         objective_[i] = value;
     } // setObjective
+    
+    /**
+     * Sets the value of the practical delay.
+     *
+     * @param value The value to be stored.
+     */
+    public void setPracticalDelay(double value)
+    {
+        practical_delay_ = value;
+    } // setPracticalDelay
 
     /**
      * Returns the value of the i-th objective.
@@ -352,6 +368,16 @@ public class Solution implements Serializable
     {
         return objective_[i];
     } // getObjective
+    
+    /**
+     * Returns the value of the practical delay.
+     *
+     * @param null.
+     */
+    public double getPracticalDelay()
+    {
+        return practical_delay_;
+    } // getPracticalDelay
 
     /**
      * Returns the number of objectives.

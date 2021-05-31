@@ -271,8 +271,11 @@ public class TNDP extends Problem
                 });
             }
         }
+        ArrayList<Integer> temp_prac_time = new ArrayList<Integer>(); 
+        Integer k_value;
         for (int k = 0; k < rs.size(); k++)
         {
+            temp_prac_time.clear();
             for (int kk = 0; kk < rs.getRoute(k).nodeList.size(); kk++) { 
                 int stop = rs.getRoute(k).nodeList.get(kk);
                 if (sharedStops.contains(stop) && sharedStopsStatistics.get(stop).size() > 1)
@@ -286,13 +289,28 @@ public class TNDP extends Problem
 //                            + " has delay: " + Integer.toString(computedPracticalDelay.get(stop)));
 //                        }
                     }
-                    practicalTime[k] += computedPracticalDelay.get(stop);
+                    temp_prac_time.add(computedPracticalDelay.get(stop));
+                    // practicalTime[k] += computedPracticalDelay.get(stop);
                 }
             }
 //            System.out.println("Theoretical Time: " + Double.toString(theoreticalTime[k]) +
 //                    "Practical Time: " + Double.toString(practicalTime[k]));
+            k_value = (int) Math.ceil((double) rs.getRoute(k).nodeList.size() / 10); // top-10% of practical evacuation time
+            practicalTime[k] = 0;
+            Collections.sort(temp_prac_time, Collections.reverseOrder());
+            for (int kk = 0; kk < k_value; kk++) {
+                practicalTime[k] += temp_prac_time.get(kk);
+            }
             evacuationTime = Math.max(evacuationTime, theoreticalTime[k] + practicalTime[k]);
         }
+        double prac_delay = 0.0;
+        for (int k = 0; k < rs.size(); k++)
+        {
+            prac_delay += practicalTime[k];
+        }
+        
+        solution.setPracticalDelay(prac_delay);
+        
         for (int i = 0; i < edgeFreqSum.length; i++)
         {
             for (int j = i + 1; j < edgeFreqSum.length; j++)

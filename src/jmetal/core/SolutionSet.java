@@ -294,6 +294,7 @@ public class SolutionSet implements Serializable {
       for (Solution aSolutionsList_ : solutionsList_) {
         if (aSolutionsList_.getOverallConstraintViolation() == 0.0) {
           bw.write(aSolutionsList_.toString());
+          bw.write(" -> " + Double.toString(aSolutionsList_.getPracticalDelay()));
           bw.newLine();
         }
       }
