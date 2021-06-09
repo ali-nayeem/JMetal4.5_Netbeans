@@ -217,13 +217,32 @@ public class TNDP extends Problem
         double evacuationTime = Double.MIN_VALUE;
         int tripRequired = 0;
         double RL, timeRequired, del;
-        int first_stoping_time = 0, stoping_time;
+        int first_stoping_time = 0, stoping_time, one_way_time = 0;
         for (int k = 0; k < rs.size(); k++)
         {
             tripRequired = (int) Math.ceil((double) routeMLS[k]/rs.getRoute(k).getCapacity());
             RL = rs.getRoute(k).calculateRouteLength_RoundTrip_edgeOverlap(time, edgeUsage, edgeFreqSum);
             totalRL += RL;
             del = (2 * RL) / (velocity * rs.getRoute(k).fleet);
+            one_way_time = 0;
+            for (int kk = 0; kk < rs.getRoute(k).nodeList.size(); kk++) {
+                // this loop will compute the time for going one pass
+                int to = rs.getRoute(k).nodeList.get(kk);
+                if (kk == 0) {
+                    one_way_time = 0;
+                    continue;
+                }
+                else 
+                {
+                    int from = rs.getRoute(k).nodeList.get(kk - 1);
+                    if (time[to][from] == Double.MAX_VALUE) {
+                        one_way_time += 100.0;
+                    }
+                    else {
+                        one_way_time += time[to][from];
+                    }
+                }
+            }
             for (int kk = 0; kk < rs.getRoute(k).nodeList.size(); kk++) {
                 int to = rs.getRoute(k).nodeList.get(kk);
                 if (kk == 0) {
@@ -244,6 +263,9 @@ public class TNDP extends Problem
                     for (int tt = 0; tt < tripRequired; tt++) {
                         sharedStopsStatistics.get(to)
                                 .add(new Pair<>(k, stoping_time));
+                        // this .add consider that the bus stop at here when it returns back
+                        sharedStopsStatistics.get(to)
+                                .add(new Pair<>(k, stoping_time + 2 * one_way_time - 2 * stoping_time));
                         stoping_time += del;
                     }
                 }
@@ -282,7 +304,7 @@ public class TNDP extends Problem
                 {
                     if (!computedPracticalDelay.containsKey(stop)) {
                         computedPracticalDelay.put
-                            (stop, computePracticalOverhead(sharedStopsStatistics.get(stop), 4));
+                            (stop, computePracticalOverhead(sharedStopsStatistics.get(stop), 2));
 //                        if (immediate_node[0] == stop || immediate_node[1] == stop
 //                           || immediate_node[2] == stop || immediate_node[3] == stop) {
 //                            System.out.println("Immediate Node: " + Integer.toString(stop) 
