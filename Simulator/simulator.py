@@ -50,7 +50,7 @@ class Bus_Stop(object):
         self.number_of_evacuee = [evacuee1, evacuee2]
 
 
-def route(env, fleet_number, capacity, route, interval, trip):
+def route(env, fleet_number, capacity, route, interval, trip, stop_list=None):
     """The car process (each car has a ``name``) arrives at the carwash
     (``cw``) and requests a cleaning machine.
 
@@ -70,15 +70,16 @@ def route(env, fleet_number, capacity, route, interval, trip):
             node1 = route[_ - 1]
             node2 = route[_]
 
-
-            if all_bus_stop[node1].number_of_evacuee[des_shelter_index] > 0 and vacancies > 0:
-                with all_bus_stop[node1].machine.request() as request:
-                    yield request
-                    yield env.timeout(configuration.BUS_STOP_STANDING_TIME)
-                    print('%s stops at bus stop (%d) at %.2f.' % (fleet_number, node1, env.now))
-                    evacuee = min(vacancies, all_bus_stop[node1].number_of_evacuee[des_shelter_index])
-                    all_bus_stop[node1].number_of_evacuee[des_shelter_index] -= evacuee
-                    vacancies -= evacuee
+            # first check if node1 in stop list
+            if stop_list is not None and node1 in stop_list:
+                if all_bus_stop[node1].number_of_evacuee[des_shelter_index] > 0 and vacancies > 0:
+                    with all_bus_stop[node1].machine.request() as request:
+                        yield request
+                        yield env.timeout(configuration.BUS_STOP_STANDING_TIME)
+                        print('%s stops at bus stop (%d) at %.2f.' % (fleet_number, node1, env.now))
+                        evacuee = min(vacancies, all_bus_stop[node1].number_of_evacuee[des_shelter_index])
+                        all_bus_stop[node1].number_of_evacuee[des_shelter_index] -= evacuee
+                        vacancies -= evacuee
 
             print('%s request (%d, %d) at %.2f.' % (fleet_number, node1, node2, env.now))
             with all_edge[node1,node2].machine.request() as request:
